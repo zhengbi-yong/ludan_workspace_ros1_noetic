@@ -1,0 +1,8 @@
+# set_force_1.msg
+
+string hand_name
+int32[] finger_ids  
+int32[] forces      # （0-3000）
+
+
+

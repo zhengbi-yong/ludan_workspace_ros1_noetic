@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>legged_dm_hw</name>
+  <version>0.0.1</version>
+  <description>Hardware interface and control node for DM legged robots</description>
+
+  <maintainer email="contact@mdmbot.com">dm</maintainer>
+  <license>MIT</license>
+
+  <!-- Build system -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Build dependencies -->
+  <build_depend>cmake_clang_tools</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>legged_hw</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>serial</build_depend>
+
+  <!-- Run-time dependencies -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>legged_hw</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>serial</exec_depend>
+  <exec_depend>cmake_clang_tools</exec_depend>
+
+  <!-- Export -->
+  <export></export>
+</package>
