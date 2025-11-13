@@ -359,7 +359,7 @@ void robot::send_motor_data()
     Send_Data.tx[8] = ((kd_tmp&0xF)<<4)|(tor_tmp>>8);
     Send_Data.tx[9] = tor_tmp;
 
-    Send_Data.tx[10]=Check_Sum(10,SEND_DATA_CHECK);   
+    Send_Data.tx[10]=check_sum(10,SEND_DATA_CHECK);   
      
     try
     { //通过串口向下位机发送数据 
@@ -400,7 +400,7 @@ void robot::get_motor_data(double &pos,double &vel,double &torque, int motor_idx
 功能: 串口通讯校验函数，数据包n有个字节，第n-1个字节为校验位，第n个字节位帧尾。第1个字节到第n-2个字节数据按位异或的结果与第n-1个字节对比，即为BCC校验
 输入参数： Count_Number：数据包前几个字节加入校验   mode：对发送数据还是接收数据进行校验
 ***************************************/
-unsigned char robot::Check_Sum(unsigned char Count_Number,unsigned char mode)
+unsigned char robot::check_sum(unsigned char Count_Number,unsigned char mode)
 {
     unsigned char check_sum=0,k;
 
