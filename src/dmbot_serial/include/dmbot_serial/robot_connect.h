@@ -22,7 +22,7 @@ public:
 
   void init_motor_serial();
   void get_motor_data_thread();
-  void publishJointStates();
+  void pub_joint_states();
   void send_motor_data();
   void fresh_cmd_motor_data(double pos, double vel, double torque, double kp, double kd, int motor_idx);
   void get_motor_data(double &pos, double &vel, double &torque, int motor_idx);

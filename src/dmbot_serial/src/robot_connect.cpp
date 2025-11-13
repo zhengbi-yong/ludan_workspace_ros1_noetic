@@ -61,7 +61,6 @@ robot::robot()
   rec_thread = std::thread(&robot::get_motor_data_thread, this);
   
   joint_state_pub = n.advertise<sensor_msgs::JointState>("joint_states", 10);   
-  // pub_thread = std::thread(&robot::publishJointStates, this);
 
   ros::Duration(2.0).sleep();
 
@@ -87,12 +86,6 @@ robot::~robot()
   {
     serial_motor.close(); 
   }
-  
- // if(pub_thread.joinable())
-  //{
- //     pub_thread.join(); 
-  //}
-
 }
 
 void robot::init_motor_serial()
@@ -257,7 +250,7 @@ void robot::get_motor_data_thread()
   ROS_WARN("[robot_connect] [%s] Feedback thread stopped, log closed.", ns.c_str());
 }
 
-void robot::publishJointStates()
+void robot::pub_joint_states()
 {
   ros::Rate rate(200); 
   while (ros::ok())
@@ -556,11 +549,6 @@ float robot::uint_to_float(int x_int, float x_min, float x_max, int bits)
   const int mask = (1 << bits) - 1;
   x_int &= mask;
   const float max_raw = static_cast<float>(mask);
-
   return x_min + (static_cast<float>(x_int) / max_raw) * span;
 }
-
-
 }
-
-
