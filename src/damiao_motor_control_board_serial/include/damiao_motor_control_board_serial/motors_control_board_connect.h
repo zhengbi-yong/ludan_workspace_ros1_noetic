@@ -11,7 +11,8 @@
 #include <mutex>
 #include <damiao_motor_control_board_serial/motor_data.h>
 #include <damiao_motor_control_board_serial/MotorState.h>
-#include <damiao_motor_control_board_serial/MotorStates.h>  // ✅ 新增
+#include <damiao_motor_control_board_serial/MotorStates.h>
+
 namespace damiao_motor_control_board_serial
 {
 
@@ -60,6 +61,6 @@ private:
   motor_comm Send_Data;
 };
 
-} // namespace dmbot_serial
+} // namespace damiao_motor_control_board_serial
 
 #endif
