@@ -11,24 +11,25 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
-#include <dmbot_serial/robot_connect.h>
-#include <dmbot_serial/motor_data.h>
+#include <damiao_motor_control_board_serial/motors_control_board_connect.h>
+#include <damiao_motor_control_board_serial/motor_data.h>
+#include <damiao_motor_control_board_serial/MotorStates.h>
 #include <algorithm>
 #include <cmath>
 
 
-namespace dmbot_serial
+namespace damiao_motor_control_board_serial
 {
 robot::robot()
 {
-
-  n.param("port", motor_serial_port, std::string("/dev/ttyACM0")); 
-  n.param("baud", motor_seial_baud, 921600);
+  _node_handle.param("port", _port, std::string("/dev/ttyACM0")); 
+  _node_handle.param("baud", _baud, 921600);
   motors.resize(NUM_MOTORS);
+  /*初始化电机的参数，此处应改成配置文件驱动。*/
   int i=0;
   for(auto& motor:motors)
   {
-      motor.name = "Motor_" + std::to_string(i);   
+      motor.name = "motor_" + std::to_string(i);   
       motor.pos = 0.0f;
       motor.vel = 0.0f;
       motor.tor = 0.0f;
@@ -40,6 +41,7 @@ robot::robot()
       motor.index=i;
       i++;
   }
+  /*此处给电机设置类型，硬编码，需要更改。*/
   motors[0].type = "10010l";
   motors[1].type = "10010l";
   motors[2].type = "10010l";
@@ -55,200 +57,241 @@ robot::robot()
   motors[11].type = "4340";
   motors[12].type = "4340";                
   motors[13].type = "4340";
-   
-  init_motor_serial();//初始化串口
 
-  rec_thread = std::thread(&robot::get_motor_data_thread, this);
-  
-  joint_state_pub = n.advertise<sensor_msgs::JointState>("joint_states", 10);   
-
+  init_serial_port();//初始化串口
+  /*接受电机数据的线程*/
+  rec_thread = std::thread(&robot::get_motor_states_thread, this);
+  /*发布电机数据*/
+  _joint_states_publisher = _node_handle.advertise<sensor_msgs::JointState>("joint_states", 10);   
+  /*等待*/
   ros::Duration(2.0).sleep();
 
-  ROS_INFO("robot init complete");
+  ROS_INFO("motors init complete");
 
 }
+
 robot::~robot()
-{   
-   for(int i=0;i<NUM_MOTORS;i++)
-  {
-    fresh_cmd_motor_data(0.0, 0.0, 0.0, 0.0, 0.0, i); //更新发给电机的参数、力矩等
-  }
-  
-  send_motor_data();
+{
+    std::string node_name = ros::this_node::getName();
 
-  stop_thread_ = true;
+    ROS_INFO_STREAM("[" << node_name << "] Shutting down...");
 
-  if(rec_thread.joinable())
-  {
-    rec_thread.join(); 
-  }
-  if (serial_motor.isOpen())
-  {
-    serial_motor.close(); 
-  }
-}
-
-void robot::init_motor_serial()
-{         
     try
     {
-      serial_motor.setPort(motor_serial_port);
-      serial_motor.setBaudrate(motor_seial_baud);
-      serial_motor.setFlowcontrol(serial::flowcontrol_none);
-      serial_motor.setParity(serial::parity_none); //default is parity_none
-      serial_motor.setStopbits(serial::stopbits_one);
-      serial_motor.setBytesize(serial::eightbits);
-      serial::Timeout time_out = serial::Timeout::simpleTimeout(20);
-      serial_motor.setTimeout(time_out);
-      serial_motor.open();
-    } 
-    catch (serial::IOException &e)  // 抓取异常
-    {
-        ROS_ERROR_STREAM("In single initialization,Unable to open motor serial port ");
-        exit(0);
+        for (int i = 0; i < NUM_MOTORS; ++i)
+        {
+            fresh_cmd_motor_data(0.0, 0.0, 0.0, 0.0, 0.0, i);
+        }
+
+        send_motor_data();
+        ROS_INFO_STREAM("[" << node_name << "] Motor stop commands sent successfully.");
+
+        _is_thread_stopped = true;
+
+        if (rec_thread.joinable())
+        {
+            ROS_INFO_STREAM("[" << node_name << "] Waiting for feedback thread to stop...");
+            rec_thread.join();
+            ROS_INFO_STREAM("[" << node_name << "] Feedback thread stopped.");
+        }
+
+        if (_serial_port.isOpen())
+        {
+            _serial_port.close();
+            ROS_INFO_STREAM("[" << node_name << "] Serial port closed.");
+        }
+
+        ROS_INFO_STREAM("[" << node_name << "] Shutdown complete.");
+
     }
-    if (serial_motor.isOpen())
+    catch (const std::exception &e)
     {
-        ROS_INFO_STREAM("In single initialization,Motor Serial Port initialized");
+        ROS_ERROR_STREAM("[" << node_name << "] Exception during shutdown: " << e.what());
     }
-    else
+    catch (...)
     {
-        ROS_ERROR_STREAM("In single initialization,Unable to open motor serial port ");
-        exit(0);
+        ROS_ERROR_STREAM("[" << node_name << "] Unknown error during shutdown.");
     }
-   
 }
 
 
-void robot::get_motor_data_thread()
+void robot::init_serial_port()
 {
-  std::string ns = ros::this_node::getNamespace();  // 取命名空间
+    try
+    {
+        std::string node_name = ros::this_node::getName();
 
-  // === 自动生成带命名空间的日志文件 ===
-  time_t now = time(nullptr);
-  char filename[256];
-  snprintf(filename, sizeof(filename),
-           "/home/ludan/ludan_ws/motor_logs/%s_motor_feedback_%s.log",
-           ns.empty() ? "global" : ns.substr(1).c_str(),     // 去掉开头的'/'
-           []{
-             char buf[64];
-             time_t t = time(nullptr);
-             strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", localtime(&t));
-             return std::string(buf);
-           }().c_str());
+        _serial_port.setPort(_port);
+        _serial_port.setBaudrate(_baud);
+        _serial_port.setFlowcontrol(serial::flowcontrol_none);
+        _serial_port.setParity(serial::parity_none);     // 无奇偶校验
+        _serial_port.setStopbits(serial::stopbits_one);   // 1个停止位
+        _serial_port.setBytesize(serial::eightbits);      // 8个数据位
 
-  std::ofstream log_file(filename, std::ios::out);
-  if (!log_file.is_open()) {
-    ROS_ERROR("无法创建 motor_feedback.log 文件（路径可能不存在）！");
-    return;
-  }
+        serial::Timeout time_out = serial::Timeout::simpleTimeout(20);
+        _serial_port.setTimeout(time_out);
 
-  ROS_INFO("[robot_connect] Feedback thread started in namespace [%s], logging to %s",
-           ns.c_str(), filename);
+        _serial_port.open();
 
-  ros::Time last_feedback_time = ros::Time::now();
-  ros::Time last_log_time = ros::Time::now();
-  ros::Time last_alive_log = ros::Time::now();
-  std::vector<bool> first_feedback_received(NUM_MOTORS, false);
+        if (!_serial_port.isOpen())
+        {
+            throw std::runtime_error("Serial port opened but not active.");
+        }
 
-  uint8_t buffer[RECEIVE_DATA_SIZE];  // 完整帧缓存
-
-  while (ros::ok() && !stop_thread_) {
-    if (!serial_motor.isOpen()) {
-      ROS_ERROR_THROTTLE(1.0, "[robot_connect] Serial port closed, trying reopen...");
-      try { serial_motor.close(); init_motor_serial(); }
-      catch (...) { ros::Duration(0.5).sleep(); continue; }
+        ROS_INFO_STREAM("[" << node_name << "] Motor serial port initialized successfully: "
+                            << _port << " @ " << _baud << " baud.");
     }
+    catch (const serial::IOException &e)
+    {
+        ROS_ERROR_STREAM("[" << ros::this_node::getName()
+                             << "] IOException: failed to open serial port '"
+                             << _port << "' (" << e.what() << ")");
+        ros::shutdown();
+    }
+    catch (const std::exception &e)
+    {
+        ROS_ERROR_STREAM("[" << ros::this_node::getName()
+                             << "] Exception: " << e.what());
+        ros::shutdown();
+    }
+    catch (...)
+    {
+        ROS_ERROR_STREAM("[" << ros::this_node::getName()
+                             << "] Unknown error occurred while initializing serial port.");
+        ros::shutdown();
+    }
+}
 
-    try {
-      // ✅ 一次性读取完整帧（防止错位）
-      size_t n = serial_motor.read(buffer, RECEIVE_DATA_SIZE);
-      if (n != RECEIVE_DATA_SIZE) continue;
+void robot::get_motor_states_thread()
+{
+  std::string node_name = ros::this_node::getName();
+  ROS_INFO_STREAM("[" << node_name << "] Feedback thread started.");
 
-      // 校验帧头
-      if (buffer[0] != FRAME_HEADER) continue;
+  ros::Rate rate(200);  // 主循环频率（Hz）
+  std::vector<uint8_t> rx_buf(RECEIVE_DATA_SIZE);
+  ros::Time last_feedback_time = ros::Time::now();
 
-      // 校验 XOR 校验码
-      uint8_t check = 0;
-      for (int k = 0; k < RECEIVE_DATA_SIZE - 1; k++) check ^= buffer[k];
-      if (check != buffer[RECEIVE_DATA_SIZE - 1]) {
-        ROS_WARN_THROTTLE(1.0, "[robot_connect] Frame checksum error, resyncing...");
+  while (ros::ok() && !_is_thread_stopped)
+  {
+    try
+    {
+      // 1️⃣ 检查串口是否打开
+      if (!_serial_port.isOpen())
+      {
+        ROS_WARN_THROTTLE(1.0, "[%s] Serial port closed, trying to reopen...", node_name.c_str());
+        try {
+          _serial_port.close();
+          init_serial_port();  // 尝试重新初始化
+          ros::Duration(0.2).sleep();
+          continue;
+        } catch (...) {
+          ros::Duration(0.5).sleep();
+          continue;
+        }
+      }
+
+      // 2️⃣ 读取数据帧
+      size_t n = _serial_port.read(rx_buf.data(), RECEIVE_DATA_SIZE);
+      if (n != RECEIVE_DATA_SIZE)
+      {
+        rate.sleep();
         continue;
       }
 
-      // ✅ 有效帧，复制到接收结构
-      memcpy(Receive_Data.rx, buffer, RECEIVE_DATA_SIZE);
+      // 3️⃣ 帧头检查
+      if (rx_buf[0] != FRAME_HEADER)
+      {
+        ROS_WARN_THROTTLE(1.0, "[%s] Invalid frame header (0x%02X).", node_name.c_str(), rx_buf[0]);
+        continue;
+      }
 
-      // === 解析每个电机的数据 ===
-      for (int i = 0; i < NUM_MOTORS; ++i) {
-        uint8_t *p = &Receive_Data.rx[1 + i * 5];   // 每电机 5 字节反馈
+      // 4️⃣ 校验 XOR 校验码
+      uint8_t xor_check = 0;
+      for (int i = 0; i < RECEIVE_DATA_SIZE - 1; ++i)
+        xor_check ^= rx_buf[i];
+
+      if (xor_check != rx_buf[RECEIVE_DATA_SIZE - 1])
+      {
+        ROS_WARN_THROTTLE(1.0, "[%s] Frame checksum mismatch.", node_name.c_str());
+        continue;
+      }
+
+      // 5️⃣ 有效帧，复制到接收缓存
+      memcpy(Receive_Data.rx, rx_buf.data(), RECEIVE_DATA_SIZE);
+
+      // 6️⃣ 解析反馈数据（每电机 5 字节）
+      for (int i = 0; i < NUM_MOTORS; ++i)
+      {
+        uint8_t *p = &Receive_Data.rx[1 + i * 5];
         auto &m = motors[i];
+
         if      (m.type == "4340")   dm4340_fbdata(m, p);
         else if (m.type == "4310")   dm4310_fbdata(m, p);
         else if (m.type == "6006")   dm6006_fbdata(m, p);
         else if (m.type == "8006")   dm8006_fbdata(m, p);
         else if (m.type == "6248p")  dm6248p_fbdata(m, p);
         else if (m.type == "10010l") dm10010l_fbdata(m, p);
-
-        if (!first_feedback_received[i]) {
-          first_feedback_received[i] = true;
-          ROS_INFO("[robot_connect] Motor %d first feedback received.", i);
-        }
       }
 
-      // --- 限频写入日志（1Hz）---
-      if ((ros::Time::now() - last_log_time).toSec() > 1.0) {
-        last_log_time = ros::Time::now();
+      // 7️⃣ 发布电机状态
+      pub_motor_states();
 
-        log_file << "Namespace: " << ns << std::endl;
-
-        // 获取系统时间（人类可读格式）
-        auto t = std::chrono::system_clock::now();
-        std::time_t t_c = std::chrono::system_clock::to_time_t(t);
-        std::tm local_tm = *std::localtime(&t_c);
-
-        // 格式化时间到字符串
-        char time_str[64];
-        std::strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", &local_tm);
-
-        // 加上毫秒
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      t.time_since_epoch()) % 1000;
-
-        // 写入日志
-        log_file << "Timestamp: " << time_str << "." << std::setfill('0')
-                 << std::setw(3) << ms.count() << std::endl;
-
-        // 仅记录电机7~13数据
-        for (int i = 7; i <= 13 && i < NUM_MOTORS; ++i) {
-          log_file << "Motor[" << i << "] "
-                   << "id=" << motors[i].id << "  "
-                   << "state=" << motors[i].state << "  "
-                   << "tor=" << motors[i].tor << std::endl;
-        }
-
-        log_file << "--------------------------------------" << std::endl;
-        log_file.flush();
-      }
-
+      // 8️⃣ 更新反馈时间
       last_feedback_time = ros::Time::now();
-
-    } catch (serial::IOException &e) {
-      ROS_ERROR_THROTTLE(1.0, "[robot_connect] Serial read error: %s", e.what());
+    }
+    catch (const serial::IOException &e)
+    {
+      ROS_ERROR_THROTTLE(1.0, "[%s] Serial IO exception: %s", node_name.c_str(), e.what());
+      ros::Duration(0.1).sleep();
+      continue;
+    }
+    catch (const std::exception &e)
+    {
+      ROS_ERROR_THROTTLE(1.0, "[%s] Exception in feedback thread: %s", node_name.c_str(), e.what());
+      ros::Duration(0.1).sleep();
+      continue;
+    }
+    catch (...)
+    {
+      ROS_ERROR_THROTTLE(1.0, "[%s] Unknown exception in feedback thread.", node_name.c_str());
+      ros::Duration(0.1).sleep();
       continue;
     }
 
-    // 定期打印线程心跳
-    if ((ros::Time::now() - last_alive_log).toSec() > 2.0) {
-      ROS_INFO("[robot_connect] [%s] thread alive, last feedback %.3fs ago",
-               ns.c_str(), (ros::Time::now() - last_feedback_time).toSec());
-      last_alive_log = ros::Time::now();
+    // 9️⃣ 检查反馈超时
+    if ((ros::Time::now() - last_feedback_time).toSec() > 1.0)
+    {
+      ROS_WARN_THROTTLE(2.0, "[%s] No feedback for over 1s.", node_name.c_str());
     }
+
+    rate.sleep();
   }
 
-  log_file.close();
-  ROS_WARN("[robot_connect] [%s] Feedback thread stopped, log closed.", ns.c_str());
+  ROS_WARN_STREAM("[" << node_name << "] Feedback thread stopped.");
 }
+
+void robot::pub_motor_states()
+{
+  // 创建消息对象
+  damiao_motor_control_board_serial::MotorStates msg;
+  msg.header.stamp = ros::Time::now();
+  msg.motors.resize(NUM_MOTORS);
+
+  // 填充所有电机状态
+  for (int i = 0; i < NUM_MOTORS; ++i)
+  {
+    msg.motors[i].id = motors[i].index;
+    msg.motors[i].type = motors[i].type;
+    msg.motors[i].pos = motors[i].pos;
+    msg.motors[i].vel = motors[i].vel;
+    msg.motors[i].tor = motors[i].tor;
+    msg.motors[i].state = motors[i].state;
+  }
+
+  // 一次性发布
+  _motor_states_publisher.publish(msg);
+}
+
 
 void robot::pub_joint_states()
 {
@@ -269,7 +312,7 @@ void robot::pub_joint_states()
           joint_state_msg.effort.push_back(motors[i].tor);
       }
 
-    joint_state_pub.publish(joint_state_msg);
+    _joint_states_publisher.publish(joint_state_msg);
 
     rate.sleep();
   }
@@ -363,7 +406,7 @@ void robot::send_motor_data()
      
     try
     { //通过串口向下位机发送数据 
-      serial_motor.write(Send_Data.tx,sizeof(Send_Data.tx));
+      _serial_port.write(Send_Data.tx,sizeof(Send_Data.tx));
     //ROS_INFO("Current time Motor: %f", interval.toSec());
     }
     catch (serial::IOException& e)   

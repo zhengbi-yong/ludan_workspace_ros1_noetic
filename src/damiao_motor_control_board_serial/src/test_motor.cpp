@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include <dmbot_serial/robot_connect.h>
+#include <damiao_motor_control_board_serial/motors_control_board_connect.h>
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   nh.param("kd",      kd,      kd);
 
   // 创建上位机串口接口
-  dmbot_serial::robot rb;
+  damiao_motor_control_board_serial::robot rb;
 
   std::vector<double> pos_cmd(N, 0.0), vel_cmd(N, 0.0), tor_cmd(N, 0.0);
 

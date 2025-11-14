@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>dmbot_serial</name>
+  <name>damiao_motor_control_board_serial</name>
   <version>0.0.0</version>
   <description>serial processing package</description>
   <maintainer email="zhengbi.yong@outlook.com">Zhengbi Yong</maintainer>

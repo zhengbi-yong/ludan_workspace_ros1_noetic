@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include <dmbot_serial/robot_connect.h>
+#include <damiao_motor_control_board_serial/motors_control_board_connect.h>
 #include <vector>
 #include <iostream>
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   ros::Rate r(100);  // 100Hz 读取
 
   // 创建 robot 通信对象（自动初始化串口）
-  dmbot_serial::robot rb;
+  damiao_motor_control_board_serial::robot rb;
 
   ROS_INFO("read_motor_feedback started. Waiting for motor feedback...");
 
