@@ -20,7 +20,7 @@
 
 namespace damiao_motor_control_board_serial
 {
-robot::robot()
+Motors::Motors()
 {
   _node_handle.param("port", _port, std::string("/dev/ttyACM0")); 
   _node_handle.param("baud", _baud, 921600);
@@ -60,7 +60,7 @@ robot::robot()
 
   init_serial_port();//初始化串口
   /*接受电机数据的线程*/
-  rec_thread = std::thread(&robot::get_motor_states_thread, this);
+  rec_thread = std::thread(&Motors::get_motor_states_thread, this);
   /*发布电机数据*/
   _joint_states_publisher = _node_handle.advertise<sensor_msgs::JointState>("joint_states", 10);   
   /*等待*/
@@ -70,7 +70,7 @@ robot::robot()
 
 }
 
-robot::~robot()
+Motors::~Motors()
 {
     std::string node_name = ros::this_node::getName();
 
@@ -115,7 +115,7 @@ robot::~robot()
 }
 
 
-void robot::init_serial_port()
+void Motors::init_serial_port()
 {
     try
     {
@@ -162,7 +162,7 @@ void robot::init_serial_port()
     }
 }
 
-void robot::get_motor_states_thread()
+void Motors::get_motor_states_thread()
 {
   std::string node_name = ros::this_node::getName();
   ROS_INFO_STREAM("[" << node_name << "] Feedback thread started.");
@@ -270,7 +270,7 @@ void robot::get_motor_states_thread()
   ROS_WARN_STREAM("[" << node_name << "] Feedback thread stopped.");
 }
 
-void robot::pub_motor_states()
+void Motors::pub_motor_states()
 {
   // 创建消息对象
   damiao_motor_control_board_serial::MotorStates msg;
@@ -293,7 +293,7 @@ void robot::pub_motor_states()
 }
 
 
-void robot::pub_joint_states()
+void Motors::pub_joint_states()
 {
   ros::Rate rate(200); 
   while (ros::ok())
@@ -318,7 +318,7 @@ void robot::pub_joint_states()
   }
 }
 
-void robot::send_motor_data()
+void Motors::send_motor_data()
 { 
   // 新加的保护逻辑  
   bool all_feedback_ok = true;
@@ -334,7 +334,7 @@ void robot::send_motor_data()
 
   if (!all_feedback_ok)
   {
-    ROS_WARN_THROTTLE(1.0, "[robot_connect] Feedback not ready, skip sending commands to prevent jump.");
+    ROS_WARN_THROTTLE(1.0, "[Motors_connect] Feedback not ready, skip sending commands to prevent jump.");
     return;  // 直接返回，不发数据
   }
   //原来的代码
@@ -419,7 +419,7 @@ void robot::send_motor_data()
 }
 
 
-void robot::fresh_cmd_motor_data(double pos, double vel,double torque, double kp,double kd,int motor_idx)
+void Motors::fresh_cmd_motor_data(double pos, double vel,double torque, double kp,double kd,int motor_idx)
 {//更新发给电机的参数、力矩等
   motors[motor_idx].pos_set = pos;
   motors[motor_idx].vel_set = vel;
@@ -428,7 +428,7 @@ void robot::fresh_cmd_motor_data(double pos, double vel,double torque, double kp
   motors[motor_idx].kd = kd;            
 }
 
-void robot::get_motor_data(double &pos,double &vel,double &torque, int motor_idx) //Monitor TODO
+void Motors::get_motor_data(double &pos,double &vel,double &torque, int motor_idx) //Monitor TODO
 {//获取电机反馈的参数、力矩等
   pos = motors[motor_idx].pos;
   // ROS_INFO_STREAM_THROTTLE(0.5, "get pos[" << motor_idx << "] = " << pos);
@@ -443,7 +443,7 @@ void robot::get_motor_data(double &pos,double &vel,double &torque, int motor_idx
 功能: 串口通讯校验函数，数据包n有个字节，第n-1个字节为校验位，第n个字节位帧尾。第1个字节到第n-2个字节数据按位异或的结果与第n-1个字节对比，即为BCC校验
 输入参数： Count_Number：数据包前几个字节加入校验   mode：对发送数据还是接收数据进行校验
 ***************************************/
-unsigned char robot::check_sum(unsigned char Count_Number,unsigned char mode)
+unsigned char Motors::check_sum(unsigned char Count_Number,unsigned char mode)
 {
     unsigned char check_sum=0,k;
 
@@ -465,7 +465,7 @@ unsigned char robot::check_sum(unsigned char Count_Number,unsigned char mode)
   return check_sum; //Returns the bitwise XOR result //返回按位异或结果
 }
 
-void robot::dm4310_fbdata(motor_data_t& moto,uint8_t *data)
+void Motors::dm4310_fbdata(motor_data_t& moto,uint8_t *data)
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -477,7 +477,7 @@ void robot::dm4310_fbdata(motor_data_t& moto,uint8_t *data)
   moto.tor = uint_to_float(moto.t_int, T_MIN1, T_MAX1, 12);  // (-10.0,10.0)
 }
 
-void robot::dm4340_fbdata(motor_data_t& moto,uint8_t *data)   // Moniter TODO
+void Motors::dm4340_fbdata(motor_data_t& moto,uint8_t *data)   // Moniter TODO
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -489,7 +489,7 @@ void robot::dm4340_fbdata(motor_data_t& moto,uint8_t *data)   // Moniter TODO
   moto.tor = uint_to_float(moto.t_int, T_MIN2, T_MAX2, 12);  // (-10.0,10.0)
 }
 
-void robot::dm6006_fbdata(motor_data_t& moto,uint8_t *data)
+void Motors::dm6006_fbdata(motor_data_t& moto,uint8_t *data)
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -501,7 +501,7 @@ void robot::dm6006_fbdata(motor_data_t& moto,uint8_t *data)
   moto.tor = uint_to_float(moto.t_int, T_MIN3, T_MAX3, 12);  // (-10.0,10.0)
 }
 
-void robot::dm8006_fbdata(motor_data_t& moto,uint8_t *data)
+void Motors::dm8006_fbdata(motor_data_t& moto,uint8_t *data)
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -513,7 +513,7 @@ void robot::dm8006_fbdata(motor_data_t& moto,uint8_t *data)
   moto.tor = uint_to_float(moto.t_int, T_MIN4, T_MAX4, 12);  // (-10.0,10.0)
 }
 
-void robot::dm6248p_fbdata(motor_data_t& moto,uint8_t *data)
+void Motors::dm6248p_fbdata(motor_data_t& moto,uint8_t *data)
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -525,7 +525,7 @@ void robot::dm6248p_fbdata(motor_data_t& moto,uint8_t *data)
   moto.tor = uint_to_float(moto.t_int, T_MIN5, T_MAX5, 12);  // (-10.0,10.0)
 }
 
-void robot::dm10010l_fbdata(motor_data_t& moto,uint8_t *data)
+void Motors::dm10010l_fbdata(motor_data_t& moto,uint8_t *data)
 {
   moto.p_int=(data[0]<<8)|data[1];
   moto.v_int=(data[2]<<4)|(data[3]>>4);
@@ -537,7 +537,7 @@ void robot::dm10010l_fbdata(motor_data_t& moto,uint8_t *data)
   moto.tor = uint_to_float(moto.t_int, T_MIN6, T_MAX6, 12);  // (-10.0,10.0)
 }
 
-int16_t robot::float_to_uint(float x_float, float x_min, float x_max, int bits)
+int16_t Motors::float_to_uint(float x_float, float x_min, float x_max, int bits)
 {
   if (bits <= 0)
   {
@@ -576,7 +576,7 @@ int16_t robot::float_to_uint(float x_float, float x_min, float x_max, int bits)
   return static_cast<int16_t>(raw);
 }
 
-float robot::uint_to_float(int x_int, float x_min, float x_max, int bits)
+float Motors::uint_to_float(int x_int, float x_min, float x_max, int bits)
 {
   if (bits <= 0)
   {

@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   nh.param("kd",      kd,      kd);
 
   // 创建上位机串口接口
-  damiao_motor_control_board_serial::robot rb;
+  damiao_motor_control_board_serial::Motors motors;
 
   std::vector<double> pos_cmd(N, 0.0), vel_cmd(N, 0.0), tor_cmd(N, 0.0);
 
@@ -45,18 +45,18 @@ int main(int argc, char **argv)
       pos_cmd[i] = pos_amp * std::sin(two_pi * freq * t + phase);
       vel_cmd[i] = 0.0;   // 如固件需要也可给导数
       tor_cmd[i] = 0.0;
-      rb.fresh_cmd_motor_data(pos_cmd[i], vel_cmd[i], tor_cmd[i], kp, kd, i);
+      motors.fresh_cmd_motor_data(pos_cmd[i], vel_cmd[i], tor_cmd[i], kp, kd, i);
     }
 
     // 下发给 STM32
-    rb.send_motor_data();
+    motors.send_motor_data();
 
     // 可选：打印少量反馈
     if (static_cast<int>(t*10) % 10 == 0) { // 约每 0.1s 打印一次
       double p0,v0,t0, p7,v7,t7, p13,v13,t13;
-      rb.get_motor_data(p0,v0,t0,0);
-      rb.get_motor_data(p7,v7,t7,7);
-      rb.get_motor_data(p13,v13,t13,13);
+      motors.get_motor_data(p0,v0,t0,0);
+      motors.get_motor_data(p7,v7,t7,7);
+      motors.get_motor_data(p13,v13,t13,13);
       ROS_INFO_THROTTLE(0.5, "m0 pos=%.3f, m7 pos=%.3f, m13 pos=%.3f", p0, p7, p13);
     }
 

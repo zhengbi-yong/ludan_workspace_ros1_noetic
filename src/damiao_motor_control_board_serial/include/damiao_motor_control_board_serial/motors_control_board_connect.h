@@ -16,11 +16,11 @@
 namespace damiao_motor_control_board_serial
 {
 
-class robot
+class Motors
 {
 public:
-  robot();
-  ~robot();
+  Motors();
+  ~Motors();
 
   void init_serial_port();
   void pub_motor_states();

@@ -8,7 +8,7 @@
  * 
  * 功能：
  *  - 初始化 ROS 节点
- *  - 创建串口连接（robot 类）
+ *  - 创建串口连接（Motors 类）
  *  - 循环读取各个电机的反馈信息（位置、速度、力矩）
  *  - 定期打印到控制台
  * 
@@ -25,8 +25,8 @@ int main(int argc, char **argv)
   ros::NodeHandle nh("~");
   ros::Rate r(100);  // 100Hz 读取
 
-  // 创建 robot 通信对象（自动初始化串口）
-  damiao_motor_control_board_serial::robot rb;
+  // 创建 Motors 通信对象（自动初始化串口）
+  damiao_motor_control_board_serial::Motors motors;
 
   ROS_INFO("read_motor_feedback started. Waiting for motor feedback...");
 
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
       ROS_INFO("------------- Motor Feedback -------------");
       for (int i = 0; i < N; ++i)
       {
-        rb.get_motor_data(pos, vel, tor, i);
+        motors.get_motor_data(pos, vel, tor, i);
         ROS_INFO("Motor[%02d] pos=%7.3f  vel=%7.3f  tor=%7.3f", i, pos, vel, tor);
       }
       ROS_INFO("------------------------------------------");
