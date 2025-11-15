@@ -24,32 +24,25 @@ Motors::Motors()
 {
   _node_handle.param("port", _port, std::string("/dev/ttyACM0")); 
   _node_handle.param("baud", _baud, 921600);
+
   motors.resize(NUM_MOTORS);
-  /*初始化电机的参数，此处应改成配置文件驱动。*/
-  int i=0;
-  for(auto& motor:motors)
+  int i = 0;
+  for (auto& motor : motors)
   {
-      motor.name = "motor_" + std::to_string(i);   
-      motor.pos = 0.0f;
-      motor.vel = 0.0f;
-      motor.tor = 0.0f;
-      motor.tor_set = 0.0f;
-      motor.pos_set = 0.0f;
-      motor.vel_set = 0.0f;
-      motor.kp = 0.0f;
-      motor.kd = 0.0f;
-      motor.index=i;
-      i++;
+      motor.name = "motor_" + std::to_string(i);
+      motor.pos = motor.vel = motor.tor = 0.0f;
+      motor.pos_set = motor.vel_set = motor.tor_set = 0.0f;
+      motor.kp = motor.kd = 0.0f;
+      motor.index = i++;
   }
-  /*此处给电机设置类型，硬编码，需要更改。*/
+
   motors[0].type = "10010l";
   motors[1].type = "10010l";
   motors[2].type = "10010l";
   motors[3].type = "6248p";                
   motors[4].type = "4340";
   motors[5].type = "4340";   
-  motors[6].type = "4340";
-    
+  motors[6].type = "4340";    
   motors[7].type = "6248p";
   motors[8].type = "6248p";
   motors[9].type = "6248p";                
@@ -58,17 +51,30 @@ Motors::Motors()
   motors[12].type = "4340";                
   motors[13].type = "4340";
 
-  init_serial_port();//初始化串口
-  /*接受电机数据的线程*/
+  //-------------------------------
+  // ① 必须先初始化 Publisher
+  //-------------------------------
+  _joint_states_publisher =
+      _node_handle.advertise<sensor_msgs::JointState>("joint_states", 10);
+
+  _motor_states_publisher =
+      _node_handle.advertise<damiao_motor_control_board_serial::MotorStates>(
+          "motor_states", 10);
+
+  //-------------------------------
+  // ② 再初始化串口
+  //-------------------------------
+  init_serial_port();
+
+  //-------------------------------
+  // ③ 最后启动线程（否则必崩）
+  //-------------------------------
   rec_thread = std::thread(&Motors::get_motor_states_thread, this);
-  /*发布电机数据*/
-  _joint_states_publisher = _node_handle.advertise<sensor_msgs::JointState>("joint_states", 10);   
-  /*等待*/
-  ros::Duration(2.0).sleep();
 
+  ros::Duration(1.0).sleep();
   ROS_INFO("Motors init complete");
-
 }
+
 
 Motors::~Motors()
 {
