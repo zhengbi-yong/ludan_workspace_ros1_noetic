@@ -66,7 +66,7 @@ Motors::Motors()
   /*等待*/
   ros::Duration(2.0).sleep();
 
-  ROS_INFO("motors init complete");
+  ROS_INFO("Motors init complete");
 
 }
 
@@ -76,7 +76,7 @@ Motors::~Motors()
 
     ROS_INFO_STREAM("[" << node_name << "] Shutting down...");
 
-    try
+    try 
     {
         for (int i = 0; i < NUM_MOTORS; ++i)
         {
