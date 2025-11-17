@@ -4,11 +4,11 @@
 #include <cstdint>
 #include <string>
 
-#define NUM_MOTORS 14
+#define NUM_MOTORS 30
 #define FRAME_HEADER 0x7B
 #define READ_DATA_CHECK 0
 #define SEND_DATA_CHECK 1
-#define RECEIVE_DATA_SIZE 72
+#define RECEIVE_DATA_SIZE 152
 #define SEND_DATA_SIZE 11
 
 // 电机范围定义

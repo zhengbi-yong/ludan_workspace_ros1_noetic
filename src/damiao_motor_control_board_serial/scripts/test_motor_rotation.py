@@ -14,14 +14,14 @@ MOTOR_NUM = 16
 # ======== 电机配置 ========
 MOTOR_CONFIGS = {
     "damiao4310": {
-        "ids": [0, 1,2,3,4,7,8,9,10,11,12,13,14,15,MOTOR_NUM+0],   # 多个同型号电机 ID
+        # "ids": [0, 1,2,3,4,7,8,9,10,11,12,13,14,15,MOTOR_NUM+0],   # 多个同型号电机 ID
         # "ids": [0,MOTOR_NUM+0, MOTOR_NUM+1,MOTOR_NUM+2,MOTOR_NUM+3,MOTOR_NUM+4,MOTOR_NUM+7,MOTOR_NUM+8,MOTOR_NUM+9,MOTOR_NUM+10,MOTOR_NUM+11,MOTOR_NUM+12,MOTOR_NUM+13,MOTOR_NUM+14,MOTOR_NUM+15],   # 多个同型号电机 ID
-        # "ids": [1, 4],   # 多个同型号电机 ID
+        "ids": [0, 4],   # 多个同型号电机 ID
         "payload": [0x7F, 0xFF, 0x84, 0x30, 0x00, 0x33, 0x38, 0xCC],
     },
     "damiao6248p": {
-        "ids": [5,6],
-        # "ids": [MOTOR_NUM+5,MOTOR_NUM+6],
+        # "ids": [5,6],
+        "ids": [MOTOR_NUM+5,MOTOR_NUM+6],
         "payload": [0x7F, 0xFF, 0x86, 0x50, 0x00, 0x33, 0x38, 0x10],
     },
     # 可以继续添加新型号

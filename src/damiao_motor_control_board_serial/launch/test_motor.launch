@@ -1,8 +1,25 @@
 <launch>
-  <node name="test_motor" pkg="dmbot_serial" type="test_motor" output="screen">
-    <param name="pos_amp" value="0.05"/>     <!-- 小幅度 0.05 rad -->
-    <param name="freq"    value="0.2"/>
-    <param name="kp"      value="2.0"/>
-    <param name="kd"      value="0.1"/>
-  </node>
+    <rosparam param="motor_ids">
+    - 0
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    </rosparam>
+
+    <node pkg="damiao_motor_control_board_serial"
+          type="test_motor"
+          name="test_motor"
+          output="screen"/>
 </launch>

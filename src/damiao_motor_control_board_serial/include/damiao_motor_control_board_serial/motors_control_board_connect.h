@@ -30,6 +30,8 @@ public:
   void fresh_cmd_motor_data(double pos, double vel, double torque, double kp, double kd, int motor_idx);
   void get_motor_data(double &pos, double &vel, double &torque, int motor_idx);
   unsigned char check_sum(unsigned char Count_Number, unsigned char mode);
+  void send_single_motor_cmd(int id, double pos, double vel, double torque, double kp, double kd);
+
 
   void dm4310_fbdata(motor_data_t& moto, uint8_t *data);
   void dm4340_fbdata(motor_data_t& moto, uint8_t *data);

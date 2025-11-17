@@ -46,6 +46,7 @@ add_library(damiao_motor_control_board_serial
 
 add_executable(test_motor src/test_motor.cpp)
 add_executable(test_motor_read src/test_motor_read.cpp)
+add_executable(test_single_motor src/test_single_motor.cpp)
 # 👇 **关键：一定要在同一个 target_link_libraries 里按顺序链接**
 target_link_libraries(
   damiao_motor_control_board_serial
@@ -69,8 +70,16 @@ target_link_libraries(test_motor_read
   rosconsole
   pthread
 )
+target_link_libraries(test_single_motor
+  damiao_motor_control_board_serial
+  ${catkin_LIBRARIES}
+  roscpp
+  rosconsole
+  pthread
+)
 
 
 add_dependencies(damiao_motor_control_board_serial ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_motor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_motor_read ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_single_motor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -36,20 +36,36 @@ Motors::Motors()
       motor.index = i++;
   }
 
-  motors[0].type = "10010l";
-  motors[1].type = "10010l";
-  motors[2].type = "10010l";
-  motors[3].type = "6248p";                
+  motors[0].type = "4340";
+  motors[1].type = "4340";
+  motors[2].type = "4340";
+  motors[3].type = "4340";                
   motors[4].type = "4340";
   motors[5].type = "4340";   
   motors[6].type = "4340";    
-  motors[7].type = "6248p";
-  motors[8].type = "6248p";
-  motors[9].type = "6248p";                
+  motors[7].type = "4340";
+  motors[8].type = "4340";
+  motors[9].type = "4340";                
   motors[10].type = "4340";
   motors[11].type = "4340";
   motors[12].type = "4340";                
   motors[13].type = "4340";
+  motors[14].type = "4340";
+  motors[15].type = "4340";
+  motors[16].type = "4340";
+  motors[17].type = "4340";
+  motors[18].type = "4340";
+  motors[19].type = "4340";
+  motors[20].type = "4340";
+  motors[21].type = "4340";
+  motors[22].type = "4340";
+  motors[23].type = "4340";
+  motors[24].type = "4340";
+  motors[25].type = "4340";
+  motors[26].type = "4340";
+  motors[27].type = "4340";
+  motors[28].type = "4340";
+  motors[29].type = "4340";
 
   //-------------------------------
   // ① 必须先初始化 Publisher
@@ -170,110 +186,86 @@ void Motors::init_serial_port()
 
 void Motors::get_motor_states_thread()
 {
-  std::string node_name = ros::this_node::getName();
-  ROS_INFO_STREAM("[" << node_name << "] Feedback thread started.");
+    std::string node_name = ros::this_node::getName();
+    ROS_INFO_STREAM("[" << node_name << "] Feedback thread started.");
 
-  ros::Rate rate(200);  // 主循环频率（Hz）
-  std::vector<uint8_t> rx_buf(RECEIVE_DATA_SIZE);
-  ros::Time last_feedback_time = ros::Time::now();
+    ros::Rate rate(200);
+    std::vector<uint8_t> rx_buf(RECEIVE_DATA_SIZE);
+    ros::Time last_feedback = ros::Time::now();
 
-  while (ros::ok() && !_is_thread_stopped)
-  {
-    try
+    while (ros::ok() && !_is_thread_stopped)
     {
-      // 1️⃣ 检查串口是否打开
-      if (!_serial_port.isOpen())
-      {
-        ROS_WARN_THROTTLE(1.0, "[%s] Serial port closed, trying to reopen...", node_name.c_str());
-        try {
-          _serial_port.close();
-          init_serial_port();  // 尝试重新初始化
-          ros::Duration(0.2).sleep();
-          continue;
-        } catch (...) {
-          ros::Duration(0.5).sleep();
-          continue;
+        try
+        {
+            if (!_serial_port.isOpen())
+            {
+                ROS_WARN_THROTTLE(1.0, "[%s] Serial closed, reopen.", node_name.c_str());
+                init_serial_port();
+                ros::Duration(0.1).sleep();
+                continue;
+            }
+
+            size_t n = _serial_port.read(rx_buf.data(), RECEIVE_DATA_SIZE);
+            if (n != RECEIVE_DATA_SIZE)
+            {
+                rate.sleep();
+                continue;
+            }
+            // // 打印原始 152 字节
+            // std::ostringstream ss;
+            // ss << "RAW UART DATA (" << n << " bytes): ";
+            // for (int i = 0; i < n; i++)
+            // {
+            //     ss << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+            //       << static_cast<int>(rx_buf[i]) << " ";
+            // }
+            // ROS_INFO_STREAM(ss.str());
+
+            // 帧头检查
+            if (rx_buf[0] != FRAME_HEADER)
+            {
+                ROS_WARN_THROTTLE(1.0, "[%s] Wrong frame header: 0x%02X",
+                                  node_name.c_str(), rx_buf[0]);
+                continue;
+            }
+
+            // 校验
+            uint8_t xor_sum = 0;
+            for (int i = 0; i < RECEIVE_DATA_SIZE - 1; i++)
+                xor_sum ^= rx_buf[i];
+
+            if (xor_sum != rx_buf[RECEIVE_DATA_SIZE - 1])
+            {
+                ROS_WARN_THROTTLE(1.0, "[%s] Checksum failed.", node_name.c_str());
+                continue;
+            }
+
+            // 解析 30 电机
+            for (int i = 0; i < NUM_MOTORS; i++)
+            {
+                uint8_t* p = &rx_buf[1 + i * 5];
+                auto& m = motors[i];
+
+                int p_int = (p[0] << 8) | p[1];
+                int v_int = (p[2] << 4) | (p[3] >> 4);
+                int t_int = ((p[3] & 0x0F) << 8) | p[4];
+
+                // 使用你原来的映射函数
+                m.pos = uint_to_float(p_int, P_MIN2, P_MAX2, 16);
+                m.vel = uint_to_float(v_int, V_MIN2, V_MAX2, 12);
+                m.tor = uint_to_float(t_int, T_MIN2, T_MAX2, 12);
+            }
+
+            pub_motor_states();
+            last_feedback = ros::Time::now();
         }
-      }
+        catch (...)
+        {
+            ROS_ERROR_THROTTLE(1.0, "[%s] Exception in feedback thread", node_name.c_str());
+        }
 
-      // 2️⃣ 读取数据帧
-      size_t n = _serial_port.read(rx_buf.data(), RECEIVE_DATA_SIZE);
-      if (n != RECEIVE_DATA_SIZE)
-      {
         rate.sleep();
-        continue;
-      }
-
-      // 3️⃣ 帧头检查
-      if (rx_buf[0] != FRAME_HEADER)
-      {
-        ROS_WARN_THROTTLE(1.0, "[%s] Invalid frame header (0x%02X).", node_name.c_str(), rx_buf[0]);
-        continue;
-      }
-
-      // 4️⃣ 校验 XOR 校验码
-      uint8_t xor_check = 0;
-      for (int i = 0; i < RECEIVE_DATA_SIZE - 1; ++i)
-        xor_check ^= rx_buf[i];
-
-      if (xor_check != rx_buf[RECEIVE_DATA_SIZE - 1])
-      {
-        ROS_WARN_THROTTLE(1.0, "[%s] Frame checksum mismatch.", node_name.c_str());
-        continue;
-      }
-
-      // 5️⃣ 有效帧，复制到接收缓存
-      memcpy(Receive_Data.rx, rx_buf.data(), RECEIVE_DATA_SIZE);
-
-      // 6️⃣ 解析反馈数据（每电机 5 字节）
-      for (int i = 0; i < NUM_MOTORS; ++i)
-      {
-        uint8_t *p = &Receive_Data.rx[1 + i * 5];
-        auto &m = motors[i];
-
-        if      (m.type == "4340")   dm4340_fbdata(m, p);
-        else if (m.type == "4310")   dm4310_fbdata(m, p);
-        else if (m.type == "6006")   dm6006_fbdata(m, p);
-        else if (m.type == "8006")   dm8006_fbdata(m, p);
-        else if (m.type == "6248p")  dm6248p_fbdata(m, p);
-        else if (m.type == "10010l") dm10010l_fbdata(m, p);
-      }
-
-      // 7️⃣ 发布电机状态
-      pub_motor_states();
-
-      // 8️⃣ 更新反馈时间
-      last_feedback_time = ros::Time::now();
     }
-    catch (const serial::IOException &e)
-    {
-      ROS_ERROR_THROTTLE(1.0, "[%s] Serial IO exception: %s", node_name.c_str(), e.what());
-      ros::Duration(0.1).sleep();
-      continue;
-    }
-    catch (const std::exception &e)
-    {
-      ROS_ERROR_THROTTLE(1.0, "[%s] Exception in feedback thread: %s", node_name.c_str(), e.what());
-      ros::Duration(0.1).sleep();
-      continue;
-    }
-    catch (...)
-    {
-      ROS_ERROR_THROTTLE(1.0, "[%s] Unknown exception in feedback thread.", node_name.c_str());
-      ros::Duration(0.1).sleep();
-      continue;
-    }
-
-    // 9️⃣ 检查反馈超时
-    if ((ros::Time::now() - last_feedback_time).toSec() > 1.0)
-    {
-      ROS_WARN_THROTTLE(2.0, "[%s] No feedback for over 1s.", node_name.c_str());
-    }
-
-    rate.sleep();
-  }
-
-  ROS_WARN_STREAM("[" << node_name << "] Feedback thread stopped.");
 }
 
 void Motors::pub_motor_states()
@@ -338,11 +330,11 @@ void Motors::send_motor_data()
     }
   }
 
-  if (!all_feedback_ok)
-  {
-    ROS_WARN_THROTTLE(1.0, "[Motors_connect] Feedback not ready, skip sending commands to prevent jump.");
-    return;  // 直接返回，不发数据
-  }
+  // if (!all_feedback_ok)
+  // {
+  //   ROS_WARN_THROTTLE(1.0, "[Motors_connect] Feedback not ready, skip sending commands to prevent jump.");
+  //   return;  // 直接返回，不发数据
+  // }
   //原来的代码
   ros::Time last_time2 = ros::Time::now();
   for(auto& motor:motors)
@@ -422,6 +414,121 @@ void Motors::send_motor_data()
 
   }  
         
+}
+
+
+void Motors::send_single_motor_cmd(int id,
+                                   double pos,
+                                   double vel,
+                                   double torque,
+                                   double kp,
+                                   double kd)
+{
+    if (id < 0 || id >= NUM_MOTORS)
+    {
+        ROS_ERROR("send_single_motor_cmd: invalid motor id %d", id);
+        return;
+    }
+
+    auto &motor = motors[id];
+
+    // ----------------------------
+    // 1. 根据 motor.type 选择映射范围
+    // ----------------------------
+    uint16_t pos_tmp, vel_tmp, kp_tmp, kd_tmp, tor_tmp;
+
+    if(motor.type == "8006")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN4,  P_MAX4,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN4,  V_MAX4,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN4, KP_MAX4, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN4, KD_MAX4, 12);
+        tor_tmp = float_to_uint(torque, T_MIN4,  T_MAX4,  12);
+    }
+    else if(motor.type == "6006")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN3,  P_MAX3,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN3,  V_MAX3,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN3, KP_MAX3, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN3, KD_MAX3, 12);
+        tor_tmp = float_to_uint(torque, T_MIN3,  T_MAX3,  12);
+    }
+    else if(motor.type == "4340")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN2,  P_MAX2,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN2,  V_MAX2,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN2, KP_MAX2, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN2, KD_MAX2, 12);
+        tor_tmp = float_to_uint(torque, T_MIN2,  T_MAX2,  12);
+    }
+    else if(motor.type == "4310")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN1,  P_MAX1,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN1,  V_MAX1,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN1, KP_MAX1, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN1, KD_MAX1, 12);
+        tor_tmp = float_to_uint(torque, T_MIN1,  T_MAX1,  12);
+    }
+    else if(motor.type == "6248p")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN5,  P_MAX5,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN5,  V_MAX5,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN5, KP_MAX5, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN5, KD_MAX5, 12);
+        tor_tmp = float_to_uint(torque, T_MIN5,  T_MAX5,  12);
+    }
+    else if(motor.type == "10010l")
+    {   
+        pos_tmp = float_to_uint(pos,  P_MIN6,  P_MAX6,  16);
+        vel_tmp = float_to_uint(vel,  V_MIN6,  V_MAX6,  12);
+        kp_tmp  = float_to_uint(kp,   KP_MIN6, KP_MAX6, 12);
+        kd_tmp  = float_to_uint(kd,   KD_MIN6, KD_MAX6, 12);
+        tor_tmp = float_to_uint(torque, T_MIN6,  T_MAX6,  12);
+    }
+    else
+    {
+        ROS_ERROR("send_single_motor_cmd: motor[%d] unknown type '%s'", id, motor.type.c_str());
+        return;
+    }
+
+    // ----------------------------
+    // 2. 构造 11 字节协议包
+    // ----------------------------
+    uint8_t tx_buf[11];
+    tx_buf[0]  = FRAME_HEADER;
+    tx_buf[1]  = id;
+
+    tx_buf[2]  = pos_tmp >> 8;
+    tx_buf[3]  = pos_tmp & 0xFF;
+
+    tx_buf[4]  = vel_tmp >> 4;
+    tx_buf[5]  = ((vel_tmp & 0x0F) << 4) | (kp_tmp >> 8);
+
+    tx_buf[6]  = kp_tmp & 0xFF;
+
+    tx_buf[7]  = kd_tmp >> 4;
+    tx_buf[8]  = ((kd_tmp & 0x0F) << 4) | (tor_tmp >> 8);
+
+    tx_buf[9]  = tor_tmp & 0xFF;
+
+    // XOR 校验
+    uint8_t sum = 0;
+    for (int i = 0; i < 10; ++i)
+        sum ^= tx_buf[i];
+
+    tx_buf[10] = sum;
+
+    // ----------------------------
+    // 3. 发串口
+    // ----------------------------
+    try
+    {
+        _serial_port.write(tx_buf, sizeof(tx_buf));
+    }
+    catch (...)
+    {
+        ROS_ERROR("send_single_motor_cmd: serial write failed");
+    }
 }
 
 
