@@ -5,12 +5,16 @@ add_compile_options(-std=c++17 -O3 -Wall)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    rospy
     serial
     diagnostic_updater
     dynamic_reconfigure
     hardware_interface
     controller_manager
     pluginlib
+    std_msgs
+    geometry_msgs
+    rosbag
     damiao_motor_control_board_serial
 )
 
@@ -21,7 +25,8 @@ generate_dynamic_reconfigure_options(
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES motor_driver motor_hw_interface
-    CATKIN_DEPENDS roscpp serial diagnostic_updater dynamic_reconfigure hardware_interface controller_manager pluginlib
+    CATKIN_DEPENDS roscpp rospy serial diagnostic_updater dynamic_reconfigure
+        hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
 )
 
 include_directories(
@@ -99,4 +104,7 @@ install(FILES
 
 install(DIRECTORY launch config
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+catkin_install_python(PROGRAMS scripts/policy_bridge.py
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
