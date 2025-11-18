@@ -7,10 +7,12 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <ros/ros.h>
 #include <string>
+#include <vector>
 
 class MotorHWInterface : public hardware_interface::RobotHW
 {
@@ -21,6 +23,17 @@ public:
     void write();  // 发送控制命令
 
 private:
+    struct JointConfig
+    {
+        std::string name;
+        int id;
+        double kp;
+        double kd;
+    };
+
+    void load_joint_config();
+    void refresh_gain_map(const std::string& param_name, std::map<std::string, double>& output_map) const;
+
     ros::NodeHandle nh_;
     MotorDriver driver_;
     std::string joint_prefix_;
@@ -36,13 +49,16 @@ private:
         double position;
     } limits_;
 
-    static constexpr int N = 30;
+    double default_kp_;
+    double default_kd_;
+
+    std::vector<JointConfig> joints_;
 
     hardware_interface::JointStateInterface jnt_state_interface_;
     hardware_interface::PositionJointInterface jnt_pos_interface_;
     hardware_interface::VelocityJointInterface jnt_vel_interface_;
     hardware_interface::EffortJointInterface jnt_eff_interface_;
 
-    double cmd_pos_[N], cmd_vel_[N], cmd_eff_[N];
-    double pos_[N], vel_[N], eff_[N];
+    std::vector<double> cmd_pos_, cmd_vel_, cmd_eff_;
+    std::vector<double> pos_, vel_, eff_;
 };
