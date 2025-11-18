@@ -20,7 +20,7 @@
 class MotorDriver
 {
 public:
-    explicit MotorDriver(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
+    explicit MotorDriver(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
 
     enum class CommandStatus
     {
