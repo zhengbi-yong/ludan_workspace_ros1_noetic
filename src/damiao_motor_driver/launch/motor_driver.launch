@@ -1,6 +1,13 @@
 <launch>
-    <node pkg="damiao_motor_driver"
-          type="motor_driver_node"
-          name="motor_driver"
-          output="screen" />
+    <arg name="ns" default="" />
+    <arg name="tf_prefix" default="" />
+
+    <group ns="$(arg ns)">
+        <node pkg="damiao_motor_driver"
+              type="motor_driver_node"
+              name="motor_driver"
+              output="screen">
+            <param name="tf_prefix" value="$(arg tf_prefix)" />
+        </node>
+    </group>
 </launch>

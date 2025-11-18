@@ -4,8 +4,10 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <string>
 #include <ros/ros.h>
 #include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_msgs/DiagnosticArray.h>
 
 #include "motor_serial.h"
 #include "motor_protocol.h"
@@ -37,15 +39,19 @@ public:
 private:
     void feedback_loop();
     void publish_states();
+    void publish_status();
     void load_motor_metadata();
     void populateDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
 
     ros::NodeHandle private_nh_;
+    ros::NodeHandle pub_nh_;
+    std::string tf_prefix_;
     MotorSerial serial_;
     std::thread fb_thread_;
     std::atomic<bool> running_;
 
     ros::Publisher motor_pub_;
+    ros::Publisher status_pub_;
 
     // ❗必须写完整命名空间（你的最重要错误）
     std::vector<damiao_motor_control_board_serial::MotorState> motors_;
@@ -59,6 +65,10 @@ private:
     size_t parse_failure_streak_;
     size_t timeout_streak_;
     size_t reconnect_requests_;
+    size_t frames_received_;
+    size_t frames_lost_;
+    size_t command_limited_count_;
+    double feedback_period_avg_;
     ros::Time last_feedback_time_;
 
     static constexpr uint8_t FRAME_HEADER = 0x7B;

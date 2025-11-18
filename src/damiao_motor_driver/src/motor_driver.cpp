@@ -1,7 +1,9 @@
 #include <damiao_motor_driver/motor_driver.h>
 #include <algorithm>
 #include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/KeyValue.h>
 #include <iostream>
+#include <diagnostic_msgs/DiagnosticArray.h>
 
 namespace {
 constexpr size_t kReadChunkSize = 256;
@@ -9,6 +11,7 @@ constexpr size_t kReadChunkSize = 256;
 
 MotorDriver::MotorDriver(ros::NodeHandle& nh)
     : private_nh_("~"),
+      pub_nh_(nh),
       serial_(private_nh_),
       running_(false),
       checksum_failures_(0),
@@ -16,12 +19,23 @@ MotorDriver::MotorDriver(ros::NodeHandle& nh)
       parse_failure_streak_(0),
       timeout_streak_(0),
       reconnect_requests_(0),
+      frames_received_(0),
+      frames_lost_(0),
+      command_limited_count_(0),
+      feedback_period_avg_(0.0),
       last_feedback_time_(ros::Time(0))
 {
     ROS_INFO("MotorDriver constructor entered !!!");
     motors_.resize(MOTOR_COUNT);
     load_motor_metadata();
-    motor_pub_ = nh.advertise<damiao_motor_control_board_serial::MotorStates>("motor_states", 10);
+
+    private_nh_.param<std::string>("tf_prefix", tf_prefix_, std::string());
+    if (!tf_prefix_.empty()) {
+        pub_nh_ = ros::NodeHandle(nh, tf_prefix_);
+    }
+
+    motor_pub_ = pub_nh_.advertise<damiao_motor_control_board_serial::MotorStates>("motor_states", 10);
+    status_pub_ = pub_nh_.advertise<diagnostic_msgs::DiagnosticArray>("status", 1, true);
 
     diag_updater_.setHardwareID("damiao_motor_driver");
     diag_updater_.add("Motor Driver", this, &MotorDriver::populateDiagnostics);
@@ -82,6 +96,8 @@ MotorDriver::CommandStatus MotorDriver::send_cmd(int id, float p, float v, float
 
     if (limited) {
         ROS_WARN_THROTTLE(2.0, "Command to motor %d was limited to protocol bounds", id);
+        ++command_limited_count_;
+        publish_status();
         return CommandStatus::Limited;
     }
 
@@ -107,6 +123,7 @@ void MotorDriver::feedback_loop()
 
         if (result.error == MotorSerial::IOError::Timeout) {
             ++timeout_streak_;
+            ++frames_lost_;
             diag_updater_.update();
             if (timeout_streak_ >= FAILURE_RECONNECT_THRESHOLD) {
                 ROS_WARN_THROTTLE(2.0, "Motor feedback timeout streak=%zu, requesting reconnect", timeout_streak_);
@@ -140,6 +157,7 @@ void MotorDriver::feedback_loop()
             auto header_it = std::find(buffer.begin(), buffer.end(), FRAME_HEADER);
             if (header_it == buffer.end()) {
                 dirty_bytes_dropped_ += buffer.size();
+                frames_lost_ += buffer.size() / FRAME_SIZE;
                 buffer.clear();
                 ++parse_failure_streak_;
                 break;
@@ -164,6 +182,7 @@ void MotorDriver::feedback_loop()
             if (checksum != buffer[FRAME_SIZE - 1]) {
                 ++checksum_failures_;
                 ++parse_failure_streak_;
+                ++frames_lost_;
                 buffer.erase(buffer.begin());
                 continue;
             }
@@ -182,12 +201,22 @@ void MotorDriver::feedback_loop()
                     motors_[i].vel = MITProtocol::uint_to_float(v_int, MITProtocol::V_MIN, MITProtocol::V_MAX, 12);
                     motors_[i].tor = MITProtocol::uint_to_float(t_int, MITProtocol::T_MIN, MITProtocol::T_MAX, 12);
                 }
-                last_feedback_time_ = ros::Time::now();
+                ros::Time now = ros::Time::now();
+                if (!last_feedback_time_.isZero()) {
+                    double period = (now - last_feedback_time_).toSec();
+                    if (feedback_period_avg_ <= 0.0) {
+                        feedback_period_avg_ = period;
+                    } else {
+                        feedback_period_avg_ = 0.9 * feedback_period_avg_ + 0.1 * period;
+                    }
+                }
+                last_feedback_time_ = now;
             }
 
             buffer.erase(buffer.begin(), buffer.begin() + FRAME_SIZE);
             parse_failure_streak_ = 0;
             parsed_frame = true;
+            ++frames_received_;
             publish_states();
         }
 
@@ -296,4 +325,37 @@ void MotorDriver::populateDiagnostics(diagnostic_updater::DiagnosticStatusWrappe
     stat.add("timeout_streak", timeout_streak_);
     stat.add("reconnect_requests", reconnect_requests_);
     stat.add("last_feedback_age", last_feedback_time_.isZero() ? -1.0 : (ros::Time::now() - last_feedback_time_).toSec());
+    const double total_frames = static_cast<double>(frames_received_ + frames_lost_);
+    stat.add("frames_received", frames_received_);
+    stat.add("frames_lost", frames_lost_);
+    stat.add("dropout_rate", total_frames > 0.0 ? static_cast<double>(frames_lost_) / total_frames : 0.0);
+    stat.add("avg_feedback_period", feedback_period_avg_);
+    stat.add("command_limited_count", command_limited_count_);
+    publish_status();
+}
+
+void MotorDriver::publish_status()
+{
+    if (!status_pub_) {
+        return;
+    }
+
+    diagnostic_msgs::DiagnosticArray array;
+    array.header.stamp = ros::Time::now();
+
+    diagnostic_msgs::DiagnosticStatus status;
+    status.name = tf_prefix_.empty() ? "motor_driver" : tf_prefix_ + "/motor_driver";
+    status.hardware_id = "damiao_motor_driver";
+    status.level = serial_.is_open() ? diagnostic_msgs::DiagnosticStatus::OK : diagnostic_msgs::DiagnosticStatus::ERROR;
+    status.message = serial_.is_open() ? "Serial connected" : "Serial disconnected";
+    status.values.reserve(6);
+    status.values.push_back(diagnostic_msgs::KeyValue{"frames_received", std::to_string(frames_received_)});
+    status.values.push_back(diagnostic_msgs::KeyValue{"frames_lost", std::to_string(frames_lost_)});
+    status.values.push_back(diagnostic_msgs::KeyValue{"dropout_rate", frames_received_ + frames_lost_ > 0 ? std::to_string(static_cast<double>(frames_lost_) / static_cast<double>(frames_received_ + frames_lost_)) : "0"});
+    status.values.push_back(diagnostic_msgs::KeyValue{"reconnect_requests", std::to_string(reconnect_requests_)});
+    status.values.push_back(diagnostic_msgs::KeyValue{"command_limited_count", std::to_string(command_limited_count_)});
+    status.values.push_back(diagnostic_msgs::KeyValue{"avg_feedback_period", std::to_string(feedback_period_avg_)});
+
+    array.status.push_back(status);
+    status_pub_.publish(array);
 }

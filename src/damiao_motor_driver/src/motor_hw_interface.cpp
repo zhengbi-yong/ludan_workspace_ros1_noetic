@@ -17,12 +17,36 @@ MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh)
     nh_.param("velocity_limit", limits_.velocity, limits_.velocity);
     nh_.param("position_limit", limits_.position, limits_.position);
 
+    nh_.param<std::string>("tf_prefix", joint_prefix_, std::string());
+    if (!joint_prefix_.empty() && joint_prefix_.back() != '/' && joint_prefix_.back() != '_') {
+        joint_prefix_ += "_";
+    }
+
+    dynamic_reconfigure::Server<damiao_motor_driver::DriverLimitsConfig>::CallbackType cb =
+        [this](damiao_motor_driver::DriverLimitsConfig& config, uint32_t) {
+            std::lock_guard<std::mutex> lock(limits_mutex_);
+            limits_.kp = config.kp_limit;
+            limits_.kd = config.kd_limit;
+            limits_.torque = config.torque_limit;
+            limits_.velocity = config.velocity_limit;
+            limits_.position = config.position_limit;
+        };
+    dr_srv_.setCallback(cb);
+
+    damiao_motor_driver::DriverLimitsConfig cfg;
+    cfg.kp_limit = limits_.kp;
+    cfg.kd_limit = limits_.kd;
+    cfg.torque_limit = limits_.torque;
+    cfg.velocity_limit = limits_.velocity;
+    cfg.position_limit = limits_.position;
+    dr_srv_.updateConfig(cfg);
+
     driver_.start();
 
     for (int i = 0; i < N; i++)
     {
         hardware_interface::JointStateHandle state_handle(
-            "joint_" + std::to_string(i),
+            joint_prefix_ + "joint_" + std::to_string(i),
             &pos_[i], &vel_[i], &eff_[i]
         );
         jnt_state_interface_.registerHandle(state_handle);
@@ -58,6 +82,12 @@ void MotorHWInterface::read()
 
 void MotorHWInterface::write()
 {
+    CommandLimits limits_copy;
+    {
+        std::lock_guard<std::mutex> lock(limits_mutex_);
+        limits_copy = limits_;
+    }
+
     auto clamp_value = [](double value, double min_val, double max_val, bool& limited) {
         double clamped = std::min(std::max(value, min_val), max_val);
         if (clamped != value) {
@@ -68,16 +98,16 @@ void MotorHWInterface::write()
 
     for (int i = 0; i < N; i++) {
         bool limited = false;
-        const double pos_min = std::max(-limits_.position, static_cast<double>(MITProtocol::P_MIN));
-        const double pos_max = std::min(limits_.position, static_cast<double>(MITProtocol::P_MAX));
-        const double vel_min = std::max(-limits_.velocity, static_cast<double>(MITProtocol::V_MIN));
-        const double vel_max = std::min(limits_.velocity, static_cast<double>(MITProtocol::V_MAX));
-        const double tor_min = std::max(-limits_.torque, static_cast<double>(MITProtocol::T_MIN));
-        const double tor_max = std::min(limits_.torque, static_cast<double>(MITProtocol::T_MAX));
+        const double pos_min = std::max(-limits_copy.position, static_cast<double>(MITProtocol::P_MIN));
+        const double pos_max = std::min(limits_copy.position, static_cast<double>(MITProtocol::P_MAX));
+        const double vel_min = std::max(-limits_copy.velocity, static_cast<double>(MITProtocol::V_MIN));
+        const double vel_max = std::min(limits_copy.velocity, static_cast<double>(MITProtocol::V_MAX));
+        const double tor_min = std::max(-limits_copy.torque, static_cast<double>(MITProtocol::T_MIN));
+        const double tor_max = std::min(limits_copy.torque, static_cast<double>(MITProtocol::T_MAX));
         const double kp_min = static_cast<double>(MITProtocol::KP_MIN);
-        const double kp_max = std::min(limits_.kp, static_cast<double>(MITProtocol::KP_MAX));
+        const double kp_max = std::min(limits_copy.kp, static_cast<double>(MITProtocol::KP_MAX));
         const double kd_min = static_cast<double>(MITProtocol::KD_MIN);
-        const double kd_max = std::min(limits_.kd, static_cast<double>(MITProtocol::KD_MAX));
+        const double kd_max = std::min(limits_copy.kd, static_cast<double>(MITProtocol::KD_MAX));
 
         double pos_cmd = clamp_value(cmd_pos_[i], pos_min, pos_max, limited);
         double vel_cmd = clamp_value(cmd_vel_[i], vel_min, vel_max, limited);
