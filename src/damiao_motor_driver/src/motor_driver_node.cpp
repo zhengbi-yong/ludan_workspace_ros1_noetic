@@ -9,8 +9,14 @@ int main(int argc, char** argv)
     MotorDriver driver(nh);
     driver.start();
 
-    ros::spin();
+    ros::Rate rate(50);
+    while (ros::ok() && driver.is_running()) {
+        ros::spinOnce();
+        rate.sleep();
+    }
 
+    ROS_INFO("motor_driver_node stopping, entering safe mode");
+    driver.send_safe_mode_frame();
     driver.stop();
     return 0;
 }

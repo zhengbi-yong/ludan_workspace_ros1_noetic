@@ -19,10 +19,19 @@ class MotorDriver
 public:
     explicit MotorDriver(ros::NodeHandle& nh);
 
+    enum class CommandStatus
+    {
+        Ok,
+        Limited,
+        SerialError,
+    };
+
     void start();     // 启动反馈线程
     void stop();      // 停止反馈线程
 
-    void send_cmd(int id, float p, float v, float kp, float kd, float torque);
+    CommandStatus send_cmd(int id, float p, float v, float kp, float kd, float torque);
+    bool is_running() const { return running_.load(); }
+    void send_safe_mode_frame();
     std::vector<damiao_motor_control_board_serial::MotorState> get_states() const;
 
 private:

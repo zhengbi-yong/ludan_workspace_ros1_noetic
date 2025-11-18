@@ -44,18 +44,48 @@ void MotorDriver::stop()
     if (fb_thread_.joinable())
         fb_thread_.join();
 
+    send_safe_mode_frame();
+
     serial_.close();
 }
 
-void MotorDriver::send_cmd(int id, float p, float v, float kp, float kd, float torque)
+namespace
 {
+float clamp_with_limits(float value, float min_limit, float max_limit, bool& limited)
+{
+    float clamped = std::min(std::max(value, min_limit), max_limit);
+    if (clamped != value)
+    {
+        limited = true;
+    }
+    return clamped;
+}
+} // namespace
+
+MotorDriver::CommandStatus MotorDriver::send_cmd(int id, float p, float v, float kp, float kd, float torque)
+{
+    bool limited = false;
+    float p_cmd = clamp_with_limits(p, MITProtocol::P_MIN, MITProtocol::P_MAX, limited);
+    float v_cmd = clamp_with_limits(v, MITProtocol::V_MIN, MITProtocol::V_MAX, limited);
+    float kp_cmd = clamp_with_limits(kp, MITProtocol::KP_MIN, MITProtocol::KP_MAX, limited);
+    float kd_cmd = clamp_with_limits(kd, MITProtocol::KD_MIN, MITProtocol::KD_MAX, limited);
+    float torque_cmd = clamp_with_limits(torque, MITProtocol::T_MIN, MITProtocol::T_MAX, limited);
+
     uint8_t tx[11];
-    MITProtocol::encode_cmd(tx, id, p, v, kp, kd, torque);
+    MITProtocol::encode_cmd(tx, id, p_cmd, v_cmd, kp_cmd, kd_cmd, torque_cmd);
     MotorSerial::IOResult write_result = serial_.write_bytes(tx, 11);
     if (write_result.error != MotorSerial::IOError::None) {
         ROS_WARN_THROTTLE(2.0, "Failed to send command to motor %d (error %d)", id,
                           static_cast<int>(write_result.error));
+        return CommandStatus::SerialError;
     }
+
+    if (limited) {
+        ROS_WARN_THROTTLE(2.0, "Command to motor %d was limited to protocol bounds", id);
+        return CommandStatus::Limited;
+    }
+
+    return CommandStatus::Ok;
 }
 
 std::vector<damiao_motor_control_board_serial::MotorState> MotorDriver::get_states() const
@@ -195,6 +225,18 @@ void MotorDriver::publish_states()
     }
 
     motor_pub_.publish(msg);
+}
+
+void MotorDriver::send_safe_mode_frame()
+{
+    std::lock_guard<std::mutex> lock(motors_mutex_);
+    for (size_t i = 0; i < motors_.size(); ++i) {
+        const auto& motor = motors_[i];
+        CommandStatus status = send_cmd(motor.id, motor.pos, 0.0f, 0.0f, 0.0f, 0.0f);
+        if (status == CommandStatus::SerialError) {
+            ROS_ERROR_THROTTLE(2.0, "Failed to send safe-mode frame for motor %d", motor.id);
+        }
+    }
 }
 
 void MotorDriver::load_motor_metadata()

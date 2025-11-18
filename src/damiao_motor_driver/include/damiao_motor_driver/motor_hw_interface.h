@@ -17,6 +17,15 @@ private:
     ros::NodeHandle nh_;
     MotorDriver driver_;
 
+    struct CommandLimits
+    {
+        double kp;
+        double kd;
+        double torque;
+        double velocity;
+        double position;
+    } limits_;
+
     static constexpr int N = 30;
 
     hardware_interface::JointStateInterface jnt_state_interface_;
