@@ -2,7 +2,7 @@
 #include <iostream>
 
 MotorDriver::MotorDriver(ros::NodeHandle& nh)
-    : serial_("/dev/ttyACM0", 921600), running_(false)
+    : private_nh_("~"), serial_(private_nh_), running_(false)
 {
     ROS_INFO("MotorDriver constructor entered !!!");
     motors_.resize(30);
@@ -12,10 +12,9 @@ MotorDriver::MotorDriver(ros::NodeHandle& nh)
 void MotorDriver::start()
 {
     if (!serial_.open()) {
-        ROS_ERROR("Failed to open motor serial port!");
+        ROS_ERROR("Failed to open motor serial port after retries!");
         return;
     }
-    ROS_INFO("serial_.open() = %d", serial_.open());
 
     running_ = true;
     fb_thread_ = std::thread(&MotorDriver::feedback_loop, this);
@@ -26,13 +25,19 @@ void MotorDriver::stop()
     running_ = false;
     if (fb_thread_.joinable())
         fb_thread_.join();
+
+    serial_.close();
 }
 
 void MotorDriver::send_cmd(int id, float p, float v, float kp, float kd, float torque)
 {
     uint8_t tx[11];
     MITProtocol::encode_cmd(tx, id, p, v, kp, kd, torque);
-    serial_.write_bytes(tx, 11);
+    MotorSerial::IOResult write_result = serial_.write_bytes(tx, 11);
+    if (write_result.error != MotorSerial::IOError::None) {
+        ROS_WARN_THROTTLE(2.0, "Failed to send command to motor %d (error %d)", id,
+                          static_cast<int>(write_result.error));
+    }
 }
 
 void MotorDriver::feedback_loop()
@@ -42,13 +47,21 @@ void MotorDriver::feedback_loop()
     uint8_t rx[152];
 
     while (running_ && ros::ok()) {
-        ROS_INFO("waiting serial...");
+        MotorSerial::IOResult result = serial_.read_bytes(rx, sizeof(rx));
 
-        size_t n = serial_.read_bytes(rx, 152);
-        ROS_INFO("read %ld bytes", n);
-
-        if (n != 152)
+        if (result.error == MotorSerial::IOError::Timeout) {
             continue;
+        }
+
+        if (result.error != MotorSerial::IOError::None) {
+            ROS_WARN_THROTTLE(2.0, "Serial read error (code %d)", static_cast<int>(result.error));
+            continue;
+        }
+
+        if (result.bytes != sizeof(rx)) {
+            ROS_WARN_THROTTLE(2.0, "Unexpected motor feedback size: %zu", result.bytes);
+            continue;
+        }
 
         for (int i = 0; i < 30; i++) {
 

@@ -6,6 +6,7 @@ add_compile_options(-std=c++14 -O3 -Wall)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     serial
+    diagnostic_updater
     hardware_interface
     controller_manager
     pluginlib
@@ -15,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES motor_driver motor_hw_interface
-    CATKIN_DEPENDS roscpp serial hardware_interface controller_manager pluginlib
+    CATKIN_DEPENDS roscpp serial diagnostic_updater hardware_interface controller_manager pluginlib
 )
 
 include_directories(
