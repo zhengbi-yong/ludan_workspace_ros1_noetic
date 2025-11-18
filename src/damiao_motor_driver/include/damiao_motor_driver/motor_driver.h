@@ -29,6 +29,7 @@ private:
     void feedback_loop();
     void publish_states();
 
+    ros::NodeHandle private_nh_;
     MotorSerial serial_;
     std::thread fb_thread_;
     std::atomic<bool> running_;
