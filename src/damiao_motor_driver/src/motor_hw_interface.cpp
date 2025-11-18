@@ -165,7 +165,7 @@ void MotorHWInterface::load_joint_config()
     joints_.clear();
 
     auto append_default = [this]() {
-        joints_.resize(MotorDriver::MOTOR_COUNT);
+        joints_.resize(MotorDriver::motor_count());
         for (size_t i = 0; i < joints_.size(); ++i) {
             joints_[i].name = "joint_" + std::to_string(i);
             joints_[i].id = static_cast<int>(i);
