@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <pluginlib/class_list_macros.h>
+#include <unordered_map>
+#include <XmlRpcValue.h>
 
 MotorHWInterface::MotorHWInterface()
     : MotorHWInterface(ros::NodeHandle("~"))
@@ -17,6 +19,11 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<Mo
     limits_.velocity = MITProtocol::V_MAX;
     limits_.position = MITProtocol::P_MAX;
 
+    default_kp_ = std::min(20.0, static_cast<double>(MITProtocol::KP_MAX));
+    default_kd_ = std::min(1.0, static_cast<double>(MITProtocol::KD_MAX));
+    nh_.param("default_kp", default_kp_, default_kp_);
+    nh_.param("default_kd", default_kd_, default_kd_);
+
     nh_.param("kp_limit", limits_.kp, limits_.kp);
     nh_.param("kd_limit", limits_.kd, limits_.kd);
     nh_.param("torque_limit", limits_.torque, limits_.torque);
@@ -27,6 +34,8 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<Mo
     if (!joint_prefix_.empty() && joint_prefix_.back() != '/' && joint_prefix_.back() != '_') {
         joint_prefix_ += "_";
     }
+
+    load_joint_config();
 
     dynamic_reconfigure::Server<damiao_motor_driver::DriverLimitsConfig>::CallbackType cb =
         [this](damiao_motor_driver::DriverLimitsConfig& config, uint32_t) {
@@ -48,11 +57,10 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<Mo
     dr_srv_.updateConfig(cfg);
 
     driver_.start();
-
-    for (int i = 0; i < N; i++)
+    for (size_t i = 0; i < joints_.size(); i++)
     {
         hardware_interface::JointStateHandle state_handle(
-            joint_prefix_ + "joint_" + std::to_string(i),
+            joint_prefix_ + joints_[i].name,
             &pos_[i], &vel_[i], &eff_[i]
         );
         jnt_state_interface_.registerHandle(state_handle);
@@ -76,13 +84,20 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<Mo
 void MotorHWInterface::read()
 {
     auto states = driver_.get_states();
-    const size_t available = states.size();
-    for (int i = 0; i < N; i++) {
-        if (static_cast<size_t>(i) < available) {
-            pos_[i] = states[i].pos;
-            vel_[i] = states[i].vel;
-            eff_[i] = states[i].tor;
+    std::unordered_map<int, size_t> id_to_index;
+    for (size_t i = 0; i < states.size(); ++i) {
+        id_to_index[states[i].id] = i;
+    }
+
+    for (size_t i = 0; i < joints_.size(); i++) {
+        auto it = id_to_index.find(joints_[i].id);
+        if (it == id_to_index.end()) {
+            continue;
         }
+        const auto& state = states[it->second];
+        pos_[i] = state.pos;
+        vel_[i] = state.vel;
+        eff_[i] = state.tor;
     }
 }
 
@@ -102,7 +117,12 @@ void MotorHWInterface::write()
         return clamped;
     };
 
-    for (int i = 0; i < N; i++) {
+    std::map<std::string, double> kp_params;
+    std::map<std::string, double> kd_params;
+    refresh_gain_map("joint_kp", kp_params);
+    refresh_gain_map("joint_kd", kd_params);
+
+    for (size_t i = 0; i < joints_.size(); i++) {
         bool limited = false;
         const double pos_min = std::max(-limits_copy.position, static_cast<double>(MITProtocol::P_MIN));
         const double pos_max = std::min(limits_copy.position, static_cast<double>(MITProtocol::P_MAX));
@@ -118,13 +138,105 @@ void MotorHWInterface::write()
         double pos_cmd = clamp_value(cmd_pos_[i], pos_min, pos_max, limited);
         double vel_cmd = clamp_value(cmd_vel_[i], vel_min, vel_max, limited);
         double eff_cmd = clamp_value(cmd_eff_[i], tor_min, tor_max, limited);
-        double kp_cmd = clamp_value(20.0, kp_min, kp_max, limited);
-        double kd_cmd = clamp_value(1.0, kd_min, kd_max, limited);
 
-        MotorDriver::CommandStatus status = driver_.send_cmd(i, pos_cmd, vel_cmd, kp_cmd, kd_cmd, eff_cmd);
+        const std::string& joint_name = joints_[i].name;
+        double kp_base = joints_[i].kp > 0.0 ? joints_[i].kp : default_kp_;
+        double kd_base = joints_[i].kd > 0.0 ? joints_[i].kd : default_kd_;
+        if (auto it = kp_params.find(joint_name); it != kp_params.end()) {
+            kp_base = it->second;
+        }
+        if (auto it = kd_params.find(joint_name); it != kd_params.end()) {
+            kd_base = it->second;
+        }
+
+        double kp_cmd = clamp_value(kp_base, kp_min, kp_max, limited);
+        double kd_cmd = clamp_value(kd_base, kd_min, kd_max, limited);
+
+        MotorDriver::CommandStatus status = driver_.send_cmd(joints_[i].id, pos_cmd, vel_cmd, kp_cmd, kd_cmd, eff_cmd);
         if (limited || status != MotorDriver::CommandStatus::Ok) {
-            ROS_ERROR_THROTTLE(1.0, "Command to motor %d limited or failed, sending zero torque", i);
-            driver_.send_cmd(i, pos_cmd, 0.0, 0.0, 0.0, 0.0);
+            ROS_ERROR_THROTTLE(1.0, "Command to motor %d limited or failed, sending zero torque", joints_[i].id);
+            driver_.send_cmd(joints_[i].id, pos_cmd, 0.0, 0.0, 0.0, 0.0);
+        }
+    }
+}
+
+void MotorHWInterface::load_joint_config()
+{
+    joints_.clear();
+
+    auto append_default = [this]() {
+        joints_.resize(MotorDriver::MOTOR_COUNT);
+        for (size_t i = 0; i < joints_.size(); ++i) {
+            joints_[i].name = "joint_" + std::to_string(i);
+            joints_[i].id = static_cast<int>(i);
+            joints_[i].kp = default_kp_;
+            joints_[i].kd = default_kd_;
+        }
+    };
+
+    XmlRpc::XmlRpcValue joints_param;
+    if (nh_.getParam("joints", joints_param) && joints_param.getType() == XmlRpc::XmlRpcValue::TypeArray && joints_param.size() > 0) {
+        joints_.reserve(static_cast<size_t>(joints_param.size()));
+        for (int i = 0; i < joints_param.size(); ++i) {
+            if (joints_param[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+                ROS_WARN_STREAM("Ignoring malformed joint entry at index " << i << " in ~joints param");
+                continue;
+            }
+            JointConfig cfg;
+            const auto& entry = joints_param[i];
+            if (entry.hasMember("name") && entry["name"].getType() == XmlRpc::XmlRpcValue::TypeString) {
+                cfg.name = static_cast<std::string>(entry["name"]);
+            } else {
+                cfg.name = "joint_" + std::to_string(i);
+            }
+
+            if (entry.hasMember("id") && (entry["id"].getType() == XmlRpc::XmlRpcValue::TypeInt || entry["id"].getType() == XmlRpc::XmlRpcValue::TypeDouble)) {
+                cfg.id = static_cast<int>(entry["id"]);
+            } else {
+                cfg.id = i;
+            }
+
+            cfg.kp = default_kp_;
+            cfg.kd = default_kd_;
+            if (entry.hasMember("kp") && (entry["kp"].getType() == XmlRpc::XmlRpcValue::TypeInt || entry["kp"].getType() == XmlRpc::XmlRpcValue::TypeDouble)) {
+                cfg.kp = static_cast<double>(entry["kp"]);
+            }
+            if (entry.hasMember("kd") && (entry["kd"].getType() == XmlRpc::XmlRpcValue::TypeInt || entry["kd"].getType() == XmlRpc::XmlRpcValue::TypeDouble)) {
+                cfg.kd = static_cast<double>(entry["kd"]);
+            }
+
+            joints_.push_back(cfg);
+        }
+    }
+
+    if (joints_.empty()) {
+        append_default();
+    }
+
+    cmd_pos_.assign(joints_.size(), 0.0);
+    cmd_vel_.assign(joints_.size(), 0.0);
+    cmd_eff_.assign(joints_.size(), 0.0);
+    pos_.assign(joints_.size(), 0.0);
+    vel_.assign(joints_.size(), 0.0);
+    eff_.assign(joints_.size(), 0.0);
+}
+
+void MotorHWInterface::refresh_gain_map(const std::string& param_name, std::map<std::string, double>& output_map) const
+{
+    output_map.clear();
+    XmlRpc::XmlRpcValue param_value;
+    if (!nh_.getParam(param_name, param_value)) {
+        return;
+    }
+
+    if (param_value.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+        ROS_WARN_STREAM("Parameter '" << param_name << "' is not a dictionary; ignoring");
+        return;
+    }
+
+    for (auto it = param_value.begin(); it != param_value.end(); ++it) {
+        if (it->second.getType() == XmlRpc::XmlRpcValue::TypeInt || it->second.getType() == XmlRpc::XmlRpcValue::TypeDouble) {
+            output_map[it->first] = static_cast<double>(it->second);
         }
     }
 }

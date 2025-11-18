@@ -5,6 +5,7 @@
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <iostream>
 #include <utility>
+#include <XmlRpcValue.h>
 
 namespace {
 constexpr size_t kReadChunkSize = 256;
@@ -272,26 +273,70 @@ void MotorDriver::send_safe_mode_frame()
 void MotorDriver::load_motor_metadata()
 {
     std::lock_guard<std::mutex> lock(motors_mutex_);
-
-    std::vector<int> ids;
-    if (private_nh_.getParam("motor_ids", ids) && ids.size() == motors_.size()) {
-        for (size_t i = 0; i < motors_.size(); ++i) {
-            motors_[i].id = ids[i];
-        }
-    } else {
+    auto fill_default_ids = [this]() {
         for (size_t i = 0; i < motors_.size(); ++i) {
             motors_[i].id = static_cast<int32_t>(i);
+        }
+    };
+
+    std::vector<int> ids;
+    if (private_nh_.getParam("motor_ids", ids)) {
+        if (ids.size() == motors_.size()) {
+            for (size_t i = 0; i < motors_.size(); ++i) {
+                motors_[i].id = ids[i];
+            }
+        } else {
+            ROS_WARN_STREAM("Parameter ~motor_ids length " << ids.size() << " does not match motor count " << motors_.size()
+                            << "; falling back to sequential IDs");
+            fill_default_ids();
+        }
+    } else {
+        XmlRpc::XmlRpcValue joints;
+        if (private_nh_.getParam("joints", joints) && joints.getType() == XmlRpc::XmlRpcValue::TypeArray &&
+            joints.size() == static_cast<int>(motors_.size())) {
+            for (int i = 0; i < joints.size(); ++i) {
+                if (joints[i].getType() == XmlRpc::XmlRpcValue::TypeStruct && joints[i].hasMember("id") &&
+                    (joints[i]["id"].getType() == XmlRpc::XmlRpcValue::TypeInt ||
+                     joints[i]["id"].getType() == XmlRpc::XmlRpcValue::TypeDouble)) {
+                    motors_[i].id = static_cast<int>(joints[i]["id"]);
+                } else {
+                    motors_[i].id = static_cast<int32_t>(i);
+                }
+            }
+        } else {
+            fill_default_ids();
         }
     }
 
     std::vector<std::string> types;
-    if (private_nh_.getParam("motor_types", types) && types.size() == motors_.size()) {
-        for (size_t i = 0; i < motors_.size(); ++i) {
-            motors_[i].type = types[i];
+    if (private_nh_.getParam("motor_types", types)) {
+        if (types.size() == motors_.size()) {
+            for (size_t i = 0; i < motors_.size(); ++i) {
+                motors_[i].type = types[i];
+            }
+        } else {
+            ROS_WARN_STREAM("Parameter ~motor_types length " << types.size() << " does not match motor count " << motors_.size()
+                            << "; marking types unknown");
+            for (auto& motor : motors_) {
+                motor.type = "unknown";
+            }
         }
     } else {
-        for (auto& motor : motors_) {
-            motor.type = "unknown";
+        XmlRpc::XmlRpcValue joints;
+        if (private_nh_.getParam("joints", joints) && joints.getType() == XmlRpc::XmlRpcValue::TypeArray &&
+            joints.size() == static_cast<int>(motors_.size())) {
+            for (int i = 0; i < joints.size(); ++i) {
+                if (joints[i].getType() == XmlRpc::XmlRpcValue::TypeStruct && joints[i].hasMember("type") &&
+                    joints[i]["type"].getType() == XmlRpc::XmlRpcValue::TypeString) {
+                    motors_[i].type = static_cast<std::string>(joints[i]["type"]);
+                } else {
+                    motors_[i].type = "unknown";
+                }
+            }
+        } else {
+            for (auto& motor : motors_) {
+                motor.type = "unknown";
+            }
         }
     }
 
