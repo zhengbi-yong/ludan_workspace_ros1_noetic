@@ -21,6 +21,10 @@ public:
     MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
     void read();   // 从电机读取状态
     void write();  // 发送控制命令
+    ros::Time getLastFeedbackTime() const { return driver_.get_last_feedback_time(); }
+    ros::Time getLastCommandUpdateTime() const;
+    void sendSafeMode();
+    void stopDriver();
 
 private:
     struct JointConfig
@@ -61,4 +65,8 @@ private:
 
     std::vector<double> cmd_pos_, cmd_vel_, cmd_eff_;
     std::vector<double> pos_, vel_, eff_;
+
+    mutable std::mutex cmd_mutex_;
+    ros::Time last_command_update_;
+    std::vector<double> last_sent_pos_, last_sent_vel_, last_sent_eff_;
 };

@@ -37,6 +37,11 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<Mo
 
     load_joint_config();
 
+    last_command_update_ = ros::Time::now();
+    last_sent_pos_ = cmd_pos_;
+    last_sent_vel_ = cmd_vel_;
+    last_sent_eff_ = cmd_eff_;
+
     dynamic_reconfigure::Server<damiao_motor_driver::DriverLimitsConfig>::CallbackType cb =
         [this](damiao_motor_driver::DriverLimitsConfig& config, uint32_t) {
             std::lock_guard<std::mutex> lock(limits_mutex_);
@@ -122,6 +127,8 @@ void MotorHWInterface::write()
     refresh_gain_map("joint_kp", kp_params);
     refresh_gain_map("joint_kd", kd_params);
 
+    bool cmd_updated = false;
+
     for (size_t i = 0; i < joints_.size(); i++) {
         bool limited = false;
         const double pos_min = std::max(-limits_copy.position, static_cast<double>(MITProtocol::P_MIN));
@@ -157,6 +164,29 @@ void MotorHWInterface::write()
             ROS_ERROR_THROTTLE(1.0, "Command to motor %d limited or failed, sending zero torque", joints_[i].id);
             driver_.send_cmd(joints_[i].id, pos_cmd, 0.0, 0.0, 0.0, 0.0);
         }
+
+        if (!cmd_updated) {
+            if (i >= last_sent_pos_.size()) {
+                cmd_updated = true;
+            } else if (pos_cmd != last_sent_pos_[i] || vel_cmd != last_sent_vel_[i] || eff_cmd != last_sent_eff_[i]) {
+                cmd_updated = true;
+            }
+        }
+
+        if (i >= last_sent_pos_.size()) {
+            last_sent_pos_.push_back(pos_cmd);
+            last_sent_vel_.push_back(vel_cmd);
+            last_sent_eff_.push_back(eff_cmd);
+        } else {
+            last_sent_pos_[i] = pos_cmd;
+            last_sent_vel_[i] = vel_cmd;
+            last_sent_eff_[i] = eff_cmd;
+        }
+    }
+
+    if (cmd_updated) {
+        std::lock_guard<std::mutex> lock(cmd_mutex_);
+        last_command_update_ = ros::Time::now();
     }
 }
 
@@ -219,6 +249,11 @@ void MotorHWInterface::load_joint_config()
     pos_.assign(joints_.size(), 0.0);
     vel_.assign(joints_.size(), 0.0);
     eff_.assign(joints_.size(), 0.0);
+
+    last_sent_pos_ = cmd_pos_;
+    last_sent_vel_ = cmd_vel_;
+    last_sent_eff_ = cmd_eff_;
+    last_command_update_ = ros::Time::now();
 }
 
 void MotorHWInterface::refresh_gain_map(const std::string& param_name, std::map<std::string, double>& output_map) const
@@ -239,6 +274,22 @@ void MotorHWInterface::refresh_gain_map(const std::string& param_name, std::map<
             output_map[it->first] = static_cast<double>(it->second);
         }
     }
+}
+
+ros::Time MotorHWInterface::getLastCommandUpdateTime() const
+{
+    std::lock_guard<std::mutex> lock(cmd_mutex_);
+    return last_command_update_;
+}
+
+void MotorHWInterface::sendSafeMode()
+{
+    driver_.send_safe_mode_frame();
+}
+
+void MotorHWInterface::stopDriver()
+{
+    driver_.stop();
 }
 
 PLUGINLIB_EXPORT_CLASS(MotorHWInterface, hardware_interface::RobotHW)
