@@ -1,5 +1,5 @@
 <launch>
-    <arg name="ns" default="" />
+    <arg name="ns" default="motor_driver" />
     <arg name="tf_prefix" default="" />
 
     <group ns="$(arg ns)">
