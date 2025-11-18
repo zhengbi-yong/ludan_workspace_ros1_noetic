@@ -64,3 +64,24 @@ rosrun damiao_motor_driver policy_bridge.py \
   _joint_order:=[0,1,2,3] _policy_path:=/tmp/policy.onnx _command_topic:=/joint_group_effort_controller/command \
   _action_clip:=2.5 _action_filter_alpha:=0.2 _record_bag_path:=/tmp/motor_states.bag
 ```
+
+## IsaacLab 部署流程
+以下步骤可将训练好的策略通过 `policy_bridge` 部署到真实电机：
+
+1. **导出模型**：
+   - TorchScript：在训练代码中使用 `torch.jit.trace`/`script` 导出，并将 `.pt` 文件路径传给 `~policy_path`，`~policy_type` 设为 `torch`（或 `auto` 让脚本自动识别）。
+   - ONNX：使用 `torch.onnx.export` 导出 `.onnx`，部署时安装 `onnxruntime`（`pip install onnxruntime`），将 `~policy_type` 设为 `onnx`。
+2. **启动硬件 + 控制器**：
+   - 推荐直接运行示例启动文件：
+     ```bash
+     roslaunch damiao_motor_driver motor_hw_with_rl.launch policy_path:=/path/to/policy.onnx joint_order:=[0,1,2,3]
+     ```
+   - 该启动文件会在命名空间 `motor_hw_interface` 下加载 `motor_hw_interface_node`、`joint_state_controller`、`joint_group_effort_controller`，并把策略输出映射到 `joint_group_effort_controller/command`。
+3. **桥接参数检查**：
+   - `~joint_order` 必须与 IsaacLab 训练时的关节索引一致；`~observation_fields` 默认 `[pos, vel, tor]`，可根据训练观测调整。
+   - `~action_clip`/`~action_scale` 控制力矩缩放与限幅，避免策略输出超出驱动器安全范围；`~action_filter_alpha`/`~action_damping` 可平滑高频抖动。
+   - `~motor_states_topic`、`~command_topic` 可匹配其他命名空间或控制器名称。
+4. **常见故障排查**：
+   - **策略加载失败**：确认 `policy_path` 存在且与 `policy_type` 匹配；若是 ONNX，确保系统已安装 `onnxruntime`。
+   - **无力矩输出/动作全为零**：检查 `action_clip` 是否过小，或 `policy_bridge` 日志是否提示动作被限幅；同时确认控制器已被 spawner 正常加载（`rosservice call /motor_hw_interface/controller_manager/list_controllers`）。
+   - **观测维度不匹配**：当终端报错 "parameter with length..." 时，核对 `joint_order` 长度是否与动作/观测维度一致，必要时在 IsaacLab 侧重新导出策略。

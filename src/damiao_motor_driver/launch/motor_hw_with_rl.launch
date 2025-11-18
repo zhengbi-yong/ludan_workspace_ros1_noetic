@@ -1,0 +1,45 @@
+<launch>
+    <arg name="ns" default="motor_hw_interface" />
+    <arg name="port" default="/dev/ttyUSB0" />
+    <arg name="baud" default="921600" />
+    <arg name="tf_prefix" default="" />
+    <arg name="loop_hz" default="500" />
+    <arg name="controller_config" default="$(find damiao_motor_driver)/cfg/effort_controllers.yaml" />
+    <arg name="policy_path" default="/tmp/policy.onnx" />
+    <arg name="policy_type" default="auto" />
+    <arg name="joint_order" default="[0,1,2,3]" />
+    <arg name="inference_rate" default="200" />
+    <arg name="action_clip" default="2.5" />
+
+    <group ns="$(arg ns)">
+        <node pkg="damiao_motor_driver"
+              type="motor_hw_interface_node"
+              name="motor_hw_interface"
+              output="screen">
+            <param name="port" value="$(arg port)" />
+            <param name="baud" value="$(arg baud)" />
+            <param name="tf_prefix" value="$(arg tf_prefix)" />
+            <param name="loop_hz" value="$(arg loop_hz)" />
+
+            <rosparam command="load" file="$(arg controller_config)" />
+        </node>
+
+        <node pkg="controller_manager" type="spawner" name="controller_spawner" output="screen"
+              args="joint_state_controller joint_group_effort_controller" />
+
+        <node pkg="damiao_motor_driver"
+              type="policy_bridge.py"
+              name="policy_bridge"
+              output="screen">
+            <param name="joint_order" value="$(arg joint_order)" />
+            <param name="policy_path" value="$(arg policy_path)" />
+            <param name="policy_type" value="$(arg policy_type)" />
+            <param name="inference_rate" value="$(arg inference_rate)" />
+            <param name="action_clip" value="$(arg action_clip)" />
+            <param name="command_topic" value="joint_group_effort_controller/command" />
+            <param name="motor_states_topic" value="motor_states" />
+            <param name="action_scale" value="1.0" />
+            <param name="observation_fields" value="[pos,vel,tor]" />
+        </node>
+    </group>
+</launch>
