@@ -7,13 +7,14 @@
 #include <damiao_motor_driver/motor_driver.h>
 #include <dynamic_reconfigure/server.h>
 #include <damiao_motor_driver/DriverLimitsConfig.h>
+#include <memory>
 #include <mutex>
 #include <string>
 
 class MotorHWInterface : public hardware_interface::RobotHW
 {
 public:
-    MotorHWInterface(ros::NodeHandle& nh);
+    MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
     void read();   // 从电机读取状态
     void write();  // 发送控制命令
 

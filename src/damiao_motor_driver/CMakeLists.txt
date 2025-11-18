@@ -72,6 +72,14 @@ target_link_libraries(trajectory_controller_node
     ${catkin_LIBRARIES}
 )
 
+if (CATKIN_ENABLE_TESTING)
+    catkin_add_gtest(motor_protocol_test test/protocol_test.cpp)
+    target_link_libraries(motor_protocol_test motor_driver ${catkin_LIBRARIES})
+
+    catkin_add_gtest(motor_driver_integration_test test/driver_integration_test.cpp)
+    target_link_libraries(motor_driver_integration_test motor_driver ${catkin_LIBRARIES})
+endif()
+
 install(TARGETS motor_driver motor_hw_interface motor_driver_node
                 send_single_motor_node trajectory_controller_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
