@@ -10,7 +10,7 @@ namespace {
 constexpr size_t kReadChunkSize = 256;
 }
 
-MotorDriver::MotorDriver(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
+MotorDriver::MotorDriver(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
     : private_nh_("~"),
       pub_nh_(nh),
       serial_(transport ? std::move(transport) : std::make_shared<MotorSerial>(private_nh_)),
