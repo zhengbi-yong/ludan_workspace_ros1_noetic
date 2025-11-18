@@ -107,20 +107,7 @@ int main(int argc, char **argv)
     }
     ROS_INFO("Serial opened OK.");
 
-    // -------------- 激活所有电机 --------------
     ROS_INFO("Activating all motors...");
-
-    // for (int k = 0; k < 20; k++)
-    // {
-    //     for (int id : motor_ids)
-    //     {
-    //         auto pkt = make_packet(id, activate_payload);
-    //         ser.write(pkt);
-    //         ros::Duration(0.003).sleep();
-    //     }
-    // }
-
-    // ROS_INFO("All motors MIT mode activated.");
 
     ros::Rate loop(500);
     float t = 0;
