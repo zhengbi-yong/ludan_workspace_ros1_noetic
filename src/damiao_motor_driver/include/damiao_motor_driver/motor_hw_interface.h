@@ -5,6 +5,10 @@
 #include <hardware_interface/robot_hw.h>
 #include <controller_manager/controller_manager.h>
 #include <damiao_motor_driver/motor_driver.h>
+#include <dynamic_reconfigure/server.h>
+#include <damiao_motor_driver/DriverLimitsConfig.h>
+#include <mutex>
+#include <string>
 
 class MotorHWInterface : public hardware_interface::RobotHW
 {
@@ -16,6 +20,9 @@ public:
 private:
     ros::NodeHandle nh_;
     MotorDriver driver_;
+    std::string joint_prefix_;
+    std::mutex limits_mutex_;
+    dynamic_reconfigure::Server<damiao_motor_driver::DriverLimitsConfig> dr_srv_;
 
     struct CommandLimits
     {

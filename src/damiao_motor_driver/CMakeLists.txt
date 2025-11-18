@@ -7,16 +7,21 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     serial
     diagnostic_updater
+    dynamic_reconfigure
     hardware_interface
     controller_manager
     pluginlib
     damiao_motor_control_board_serial
 )
 
+generate_dynamic_reconfigure_options(
+    cfg/driver_limits.cfg
+)
+
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES motor_driver motor_hw_interface
-    CATKIN_DEPENDS roscpp serial diagnostic_updater hardware_interface controller_manager pluginlib
+    CATKIN_DEPENDS roscpp serial diagnostic_updater dynamic_reconfigure hardware_interface controller_manager pluginlib
 )
 
 include_directories(
@@ -34,6 +39,7 @@ add_library(motor_driver
 target_link_libraries(motor_driver
     ${catkin_LIBRARIES}
 )
+add_dependencies(motor_driver ${PROJECT_NAME}_gencfg)
 
 # ros_control 插件
 add_library(motor_hw_interface
@@ -43,6 +49,7 @@ target_link_libraries(motor_hw_interface
     motor_driver
     ${catkin_LIBRARIES}
 )
+add_dependencies(motor_hw_interface ${PROJECT_NAME}_gencfg)
 
 # 启动驱动节点（唯一占用串口）
 add_executable(motor_driver_node src/motor_driver_node.cpp)
