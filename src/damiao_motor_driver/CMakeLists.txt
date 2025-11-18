@@ -51,6 +51,13 @@ target_link_libraries(motor_hw_interface
 )
 add_dependencies(motor_hw_interface ${PROJECT_NAME}_gencfg)
 
+# ros_control 硬件接口节点
+add_executable(motor_hw_interface_node src/motor_hw_interface_node.cpp)
+target_link_libraries(motor_hw_interface_node
+    motor_hw_interface
+    ${catkin_LIBRARIES}
+)
+
 # 启动驱动节点（唯一占用串口）
 add_executable(motor_driver_node src/motor_driver_node.cpp)
 target_link_libraries(motor_driver_node
@@ -81,7 +88,15 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 install(TARGETS motor_driver motor_hw_interface motor_driver_node
+                motor_hw_interface_node
                 send_single_motor_node trajectory_controller_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+
+install(FILES
+        motor_hw_interface_plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(DIRECTORY launch config
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 

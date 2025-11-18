@@ -1,19 +1,20 @@
 #pragma once
 
+#include <controller_manager/controller_manager.h>
+#include <damiao_motor_driver/DriverLimitsConfig.h>
+#include <damiao_motor_driver/motor_driver.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
-#include <controller_manager/controller_manager.h>
-#include <damiao_motor_driver/motor_driver.h>
-#include <dynamic_reconfigure/server.h>
-#include <damiao_motor_driver/DriverLimitsConfig.h>
 #include <memory>
 #include <mutex>
+#include <ros/ros.h>
 #include <string>
 
 class MotorHWInterface : public hardware_interface::RobotHW
 {
 public:
+    MotorHWInterface();
     MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
     void read();   // 从电机读取状态
     void write();  // 发送控制命令
