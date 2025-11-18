@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(damiao_motor_driver)
 
-add_compile_options(-std=c++14 -O3 -Wall)
+add_compile_options(-std=c++17 -O3 -Wall)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp

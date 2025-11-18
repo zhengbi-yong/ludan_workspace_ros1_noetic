@@ -22,6 +22,8 @@ class MotorDriver
 public:
     explicit MotorDriver(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
 
+    static constexpr size_t motor_count() { return MOTOR_COUNT; }
+
     enum class CommandStatus
     {
         Ok,
