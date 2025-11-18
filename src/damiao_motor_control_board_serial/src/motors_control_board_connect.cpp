@@ -37,12 +37,12 @@ Motors::Motors()
   }
 
   motors[0].type = "4340";
-  motors[1].type = "4340";
-  motors[2].type = "4340";
-  motors[3].type = "4340";                
-  motors[4].type = "4340";
-  motors[5].type = "4340";   
-  motors[6].type = "4340";    
+  motors[1].type = "10010l";
+  motors[2].type = "10010l";
+  motors[3].type = "10010l";                
+  motors[4].type = "6248p";
+  motors[5].type = "6248p";   
+  motors[6].type = "10010l";    
   motors[7].type = "4340";
   motors[8].type = "4340";
   motors[9].type = "4340";                

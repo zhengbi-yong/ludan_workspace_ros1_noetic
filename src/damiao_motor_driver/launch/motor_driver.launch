@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="damiao_motor_driver"
+          type="motor_driver_node"
+          name="motor_driver"
+          output="screen" />
+</launch>
