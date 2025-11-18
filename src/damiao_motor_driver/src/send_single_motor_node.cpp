@@ -15,12 +15,14 @@ int main(int argc, char** argv)
 
     ros::Rate rate(100);
 
-    while (ros::ok())
+    while (ros::ok() && driver.is_running())
     {
         driver.send_cmd(id, 0.0, 0.0, 10.0, 1.0, 0.0);
         rate.sleep();
     }
 
+    ROS_INFO("Stopping single motor node, entering safe mode");
+    driver.send_safe_mode_frame();
     driver.stop();                 // *********** 建议加 ***********
     return 0;
 }

@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 
     double t = 0;
 
-    while (ros::ok())
+    while (ros::ok() && driver.is_running())
     {
         double pos = 0.5 * sin(2 * M_PI * 0.5 * t);
         double vel = 0.5 * 2 * M_PI * 0.5 * cos(2 * M_PI * 0.5 * t);
@@ -29,6 +29,9 @@ int main(int argc, char** argv)
         t += 0.002;
         rate.sleep();
     }
+
+    ROS_INFO("Trajectory controller stopping, sending safe-mode frame");
+    driver.send_safe_mode_frame();
 
     return 0;
 }
