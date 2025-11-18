@@ -1,6 +1,12 @@
 #include "damiao_motor_driver/motor_hw_interface.h"
 
 #include <algorithm>
+#include <pluginlib/class_list_macros.h>
+
+MotorHWInterface::MotorHWInterface()
+    : MotorHWInterface(ros::NodeHandle("~"))
+{
+}
 
 MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
     : nh_(nh), driver_(nh, std::move(transport))
@@ -122,3 +128,5 @@ void MotorHWInterface::write()
         }
     }
 }
+
+PLUGINLIB_EXPORT_CLASS(MotorHWInterface, hardware_interface::RobotHW)

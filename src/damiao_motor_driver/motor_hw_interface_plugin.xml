@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <library path="libmotor_hw_interface">
   <class name="damiao_motor_driver/MotorHWInterface"
          type="MotorHWInterface"
