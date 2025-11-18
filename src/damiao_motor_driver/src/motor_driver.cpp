@@ -350,12 +350,23 @@ void MotorDriver::publish_status()
     status.level = serial_->is_open() ? diagnostic_msgs::DiagnosticStatus::OK : diagnostic_msgs::DiagnosticStatus::ERROR;
     status.message = serial_->is_open() ? "Serial connected" : "Serial disconnected";
     status.values.reserve(6);
-    status.values.push_back(diagnostic_msgs::KeyValue{"frames_received", std::to_string(frames_received_)});
-    status.values.push_back(diagnostic_msgs::KeyValue{"frames_lost", std::to_string(frames_lost_)});
-    status.values.push_back(diagnostic_msgs::KeyValue{"dropout_rate", frames_received_ + frames_lost_ > 0 ? std::to_string(static_cast<double>(frames_lost_) / static_cast<double>(frames_received_ + frames_lost_)) : "0"});
-    status.values.push_back(diagnostic_msgs::KeyValue{"reconnect_requests", std::to_string(reconnect_requests_)});
-    status.values.push_back(diagnostic_msgs::KeyValue{"command_limited_count", std::to_string(command_limited_count_)});
-    status.values.push_back(diagnostic_msgs::KeyValue{"avg_feedback_period", std::to_string(feedback_period_avg_)});
+    auto add_key_value = [&status](const std::string& key, const std::string& value) {
+        status.values.emplace_back();
+        diagnostic_msgs::KeyValue& kv = status.values.back();
+        kv.key = key;
+        kv.value = value;
+    };
+
+    add_key_value("frames_received", std::to_string(frames_received_));
+    add_key_value("frames_lost", std::to_string(frames_lost_));
+    add_key_value(
+        "dropout_rate",
+        frames_received_ + frames_lost_ > 0
+            ? std::to_string(static_cast<double>(frames_lost_) / static_cast<double>(frames_received_ + frames_lost_))
+            : "0");
+    add_key_value("reconnect_requests", std::to_string(reconnect_requests_));
+    add_key_value("command_limited_count", std::to_string(command_limited_count_));
+    add_key_value("avg_feedback_period", std::to_string(feedback_period_avg_));
 
     array.status.push_back(status);
     status_pub_.publish(array);
