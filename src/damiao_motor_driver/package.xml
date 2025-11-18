@@ -10,12 +10,16 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>roscpp</depend>
+  <depend>rospy</depend>
   <depend>serial</depend>
   <depend>diagnostic_updater</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>hardware_interface</depend>
   <depend>controller_manager</depend>
   <depend>pluginlib</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rosbag</depend>
   <depend>damiao_motor_control_board_serial</depend>
 
   <export>

@@ -49,3 +49,18 @@ rosrun damiao_motor_driver trajectory_controller_node
 - 正常退出 (`Ctrl+C`) 或检测到严重错误时，节点会调用 `send_safe_mode_frame`，向所有已知 ID 下发零速度零力矩指令，确保电机安全停车。
 
 按照上述流程，即可在硬件上验证驱动的通讯、反馈和控制功能是否正常。
+
+## 策略桥接与离线回放
+`scripts/policy_bridge.py` 提供了一个基于 Python/rospy 的轻量级策略桥接节点，便于把上层学习策略或离线控制轨迹映射到电机控制器：
+
+- 订阅 `motor_states` 并按照 `~joint_order` 与 `~observation_fields` 构造观测向量，可选归一化/裁剪（`~observation_scale`、`~observation_clip`）。
+- 从 TorchScript/ONNX 权重（`~policy_path`、`~policy_type`）推理，或订阅外部动作话题（`~action_topic`）。动作支持缩放/限幅（`~action_scale`、`~action_clip`）以及低通/阻尼滤波（`~action_filter_alpha`、`~action_damping`）。
+- 输出可映射到 `cmd_vel`（Twist）或 `joint_group_effort_controller/command` 等控制器话题。
+- 支持 rosbag/CSV 回放（`~playback_source`、`~playback_topic`），并可将反馈记录到 bag/CSV（`~record_bag_path`、`~record_csv_path`）以评估延迟与安全钳位效果。
+
+例如：
+```bash
+rosrun damiao_motor_driver policy_bridge.py \
+  _joint_order:=[0,1,2,3] _policy_path:=/tmp/policy.onnx _command_topic:=/joint_group_effort_controller/command \
+  _action_clip:=2.5 _action_filter_alpha:=0.2 _record_bag_path:=/tmp/motor_states.bag
+```
