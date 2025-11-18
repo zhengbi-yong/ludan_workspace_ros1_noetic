@@ -90,6 +90,9 @@ if (CATKIN_ENABLE_TESTING)
 
     catkin_add_gtest(motor_driver_integration_test test/driver_integration_test.cpp)
     target_link_libraries(motor_driver_integration_test motor_driver ${catkin_LIBRARIES})
+
+    catkin_add_gtest(motor_hw_interface_test test/motor_hw_interface_test.cpp)
+    target_link_libraries(motor_hw_interface_test motor_hw_interface ${catkin_LIBRARIES})
 endif()
 
 install(TARGETS motor_driver motor_hw_interface motor_driver_node
@@ -102,7 +105,7 @@ install(FILES
         motor_hw_interface_plugin.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-install(DIRECTORY launch config
+install(DIRECTORY launch config cfg
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 catkin_install_python(PROGRAMS scripts/policy_bridge.py
