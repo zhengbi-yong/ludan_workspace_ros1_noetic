@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dynamic_reconfigure/server.h>
 #include <controller_manager/controller_manager.h>
 #include <damiao_motor_driver/DriverLimitsConfig.h>
 #include <damiao_motor_driver/motor_driver.h>
@@ -15,7 +16,7 @@ class MotorHWInterface : public hardware_interface::RobotHW
 {
 public:
     MotorHWInterface();
-    MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
+    MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
     void read();   // 从电机读取状态
     void write();  // 发送控制命令
 

@@ -8,7 +8,7 @@ MotorHWInterface::MotorHWInterface()
 {
 }
 
-MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
+MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
     : nh_(nh), driver_(nh, std::move(transport))
 {
     limits_.kp = MITProtocol::KP_MAX;
