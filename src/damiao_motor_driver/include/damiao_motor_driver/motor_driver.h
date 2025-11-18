@@ -38,6 +38,7 @@ public:
     bool is_running() const { return running_.load(); }
     void send_safe_mode_frame();
     std::vector<damiao_motor_control_board_serial::MotorState> get_states() const;
+    ros::Time get_last_feedback_time() const { return last_feedback_time_; }
 
 private:
     void feedback_loop();
