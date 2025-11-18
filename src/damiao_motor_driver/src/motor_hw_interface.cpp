@@ -31,11 +31,14 @@ MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh)
 
 void MotorHWInterface::read()
 {
+    auto states = driver_.get_states();
+    const size_t available = states.size();
     for (int i = 0; i < N; i++) {
-        auto &m = driver_.get_states();
-        pos_[i] = m[i].pos;
-        vel_[i] = m[i].vel;
-        eff_[i] = m[i].tor;
+        if (static_cast<size_t>(i) < available) {
+            pos_[i] = states[i].pos;
+            vel_[i] = states[i].vel;
+            eff_[i] = states[i].tor;
+        }
     }
 }
 
