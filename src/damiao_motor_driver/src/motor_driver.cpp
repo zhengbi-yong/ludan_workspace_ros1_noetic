@@ -2,17 +2,18 @@
 #include <algorithm>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
-#include <iostream>
 #include <diagnostic_msgs/DiagnosticArray.h>
+#include <iostream>
+#include <utility>
 
 namespace {
 constexpr size_t kReadChunkSize = 256;
 }
 
-MotorDriver::MotorDriver(ros::NodeHandle& nh)
+MotorDriver::MotorDriver(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
     : private_nh_("~"),
       pub_nh_(nh),
-      serial_(private_nh_),
+      serial_(transport ? std::move(transport) : std::make_shared<MotorSerial>(private_nh_)),
       running_(false),
       checksum_failures_(0),
       dirty_bytes_dropped_(0),
@@ -43,7 +44,7 @@ MotorDriver::MotorDriver(ros::NodeHandle& nh)
 
 void MotorDriver::start()
 {
-    if (!serial_.open()) {
+    if (!serial_->open()) {
         ROS_ERROR("Failed to open motor serial port after retries!");
         return;
     }
@@ -60,7 +61,7 @@ void MotorDriver::stop()
 
     send_safe_mode_frame();
 
-    serial_.close();
+    serial_->close();
 }
 
 namespace
@@ -87,8 +88,8 @@ MotorDriver::CommandStatus MotorDriver::send_cmd(int id, float p, float v, float
 
     uint8_t tx[11];
     MITProtocol::encode_cmd(tx, id, p_cmd, v_cmd, kp_cmd, kd_cmd, torque_cmd);
-    MotorSerial::IOResult write_result = serial_.write_bytes(tx, 11);
-    if (write_result.error != MotorSerial::IOError::None) {
+    MotorTransport::IOResult write_result = serial_->write_bytes(tx, 11);
+    if (write_result.error != MotorTransport::IOError::None) {
         ROS_WARN_THROTTLE(2.0, "Failed to send command to motor %d (error %d)", id,
                           static_cast<int>(write_result.error));
         return CommandStatus::SerialError;
@@ -119,17 +120,17 @@ void MotorDriver::feedback_loop()
 
     while (running_ && ros::ok()) {
         uint8_t chunk[kReadChunkSize];
-        MotorSerial::IOResult result = serial_.read_bytes(chunk, sizeof(chunk));
+        MotorTransport::IOResult result = serial_->read_bytes(chunk, sizeof(chunk));
 
-        if (result.error == MotorSerial::IOError::Timeout) {
+        if (result.error == MotorTransport::IOError::Timeout) {
             ++timeout_streak_;
             ++frames_lost_;
             diag_updater_.update();
             if (timeout_streak_ >= FAILURE_RECONNECT_THRESHOLD) {
                 ROS_WARN_THROTTLE(2.0, "Motor feedback timeout streak=%zu, requesting reconnect", timeout_streak_);
                 ++reconnect_requests_;
-                serial_.close();
-                if (!serial_.open()) {
+                serial_->close();
+                if (!serial_->open()) {
                     ROS_ERROR("Failed to reconnect after timeout streak, stopping driver");
                     running_ = false;
                 }
@@ -137,7 +138,7 @@ void MotorDriver::feedback_loop()
             continue;
         }
 
-        if (result.error != MotorSerial::IOError::None) {
+        if (result.error != MotorTransport::IOError::None) {
             ++parse_failure_streak_;
             ROS_WARN_THROTTLE(2.0, "Serial read error (code %d)", static_cast<int>(result.error));
             diag_updater_.update();
@@ -224,8 +225,8 @@ void MotorDriver::feedback_loop()
             if (parse_failure_streak_ >= FAILURE_RECONNECT_THRESHOLD) {
                 ++reconnect_requests_;
                 ROS_WARN_THROTTLE(2.0, "Repeated parse failures (%zu), reconnecting", parse_failure_streak_);
-                serial_.close();
-                if (!serial_.open()) {
+                serial_->close();
+                if (!serial_->open()) {
                     ROS_ERROR("Reconnect failed after parse errors, stopping driver");
                     running_ = false;
                 }
@@ -308,7 +309,7 @@ void MotorDriver::load_motor_metadata()
 
 void MotorDriver::populateDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
-    const bool link_ok = serial_.is_open();
+    const bool link_ok = serial_->is_open();
     const bool stale = last_feedback_time_.isZero() || (ros::Time::now() - last_feedback_time_).toSec() > 1.0;
 
     if (!link_ok || parse_failure_streak_ >= FAILURE_RECONNECT_THRESHOLD || timeout_streak_ >= FAILURE_RECONNECT_THRESHOLD) {
@@ -346,8 +347,8 @@ void MotorDriver::publish_status()
     diagnostic_msgs::DiagnosticStatus status;
     status.name = tf_prefix_.empty() ? "motor_driver" : tf_prefix_ + "/motor_driver";
     status.hardware_id = "damiao_motor_driver";
-    status.level = serial_.is_open() ? diagnostic_msgs::DiagnosticStatus::OK : diagnostic_msgs::DiagnosticStatus::ERROR;
-    status.message = serial_.is_open() ? "Serial connected" : "Serial disconnected";
+    status.level = serial_->is_open() ? diagnostic_msgs::DiagnosticStatus::OK : diagnostic_msgs::DiagnosticStatus::ERROR;
+    status.message = serial_->is_open() ? "Serial connected" : "Serial disconnected";
     status.values.reserve(6);
     status.values.push_back(diagnostic_msgs::KeyValue{"frames_received", std::to_string(frames_received_)});
     status.values.push_back(diagnostic_msgs::KeyValue{"frames_lost", std::to_string(frames_lost_)});

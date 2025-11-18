@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh)
-    : nh_(nh), driver_(nh)
+MotorHWInterface::MotorHWInterface(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
+    : nh_(nh), driver_(nh, std::move(transport))
 {
     limits_.kp = MITProtocol::KP_MAX;
     limits_.kd = MITProtocol::KD_MAX;

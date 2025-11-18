@@ -9,29 +9,43 @@
 #include <ros/ros.h>
 #include <serial/serial.h>
 
-class MotorSerial {
+class MotorTransport
+{
 public:
-    enum class IOError {
+    enum class IOError
+    {
         None = 0,
         NotOpen,
         Timeout,
         IOError,
     };
 
-    struct IOResult {
+    struct IOResult
+    {
         size_t bytes = 0;
         IOError error = IOError::None;
     };
 
+    virtual ~MotorTransport() = default;
+    virtual bool open() = 0;
+    virtual void close() = 0;
+    virtual bool is_open() = 0;
+    virtual IOResult write_bytes(const uint8_t* data, size_t size) = 0;
+    virtual IOResult read_bytes(uint8_t* buffer, size_t size) = 0;
+};
+
+class MotorSerial : public MotorTransport
+{
+public:
     explicit MotorSerial(ros::NodeHandle& nh);
-    ~MotorSerial();
+    ~MotorSerial() override;
 
-    bool open();
-    void close();
-    bool is_open();
+    bool open() override;
+    void close() override;
+    bool is_open() override;
 
-    IOResult write_bytes(const uint8_t* data, size_t size);
-    IOResult read_bytes(uint8_t* buffer, size_t size);
+    IOResult write_bytes(const uint8_t* data, size_t size) override;
+    IOResult read_bytes(uint8_t* buffer, size_t size) override;
 
 private:
     bool open_once();

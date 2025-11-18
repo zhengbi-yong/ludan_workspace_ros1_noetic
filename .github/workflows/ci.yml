@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-20.04
+    env:
+      ROS_DISTRO: noetic
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: noetic
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-catkin-tools clang-format-10 clang-tidy-10 cppcheck
+
+      - name: Format check
+        run: |
+          find src -name "*.cpp" -o -name "*.h" | xargs clang-format-10 --Werror --dry-run
+
+      - name: Configure workspace
+        run: |
+          catkin config --extend /opt/ros/${ROS_DISTRO} --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Build
+        run: catkin build --no-status --verbose
+
+      - name: Clang-Tidy
+        run: run-clang-tidy-10 -p build -quiet
+
+      - name: Static analysis
+        run: |
+          cppcheck --enable=all --error-exitcode=1 --std=c++14 --force --inline-suppr \
+            -I src/damiao_motor_driver/include \
+            src/damiao_motor_driver/src src/damiao_motor_driver/test
+
+      - name: Tests
+        run: catkin run_tests
+
+      - name: Test results
+        run: catkin_test_results build

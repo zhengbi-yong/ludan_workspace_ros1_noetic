@@ -1,10 +1,11 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
-#include <string>
 #include <ros/ros.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
@@ -19,7 +20,7 @@
 class MotorDriver
 {
 public:
-    explicit MotorDriver(ros::NodeHandle& nh);
+    explicit MotorDriver(ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
 
     enum class CommandStatus
     {
@@ -46,7 +47,7 @@ private:
     ros::NodeHandle private_nh_;
     ros::NodeHandle pub_nh_;
     std::string tf_prefix_;
-    MotorSerial serial_;
+    std::shared_ptr<MotorTransport> serial_;
     std::thread fb_thread_;
     std::atomic<bool> running_;
 
