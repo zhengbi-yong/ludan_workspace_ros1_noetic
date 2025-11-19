@@ -18,5 +18,11 @@
 
             <rosparam command="load" file="$(arg controller_config)" />
         </node>
+
+        <node pkg="controller_manager"
+              type="spawner"
+              name="controller_spawner"
+              output="screen"
+              args="joint_state_controller effort_group_controller" />
     </group>
 </launch>
