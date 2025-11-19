@@ -68,6 +68,5 @@ private:
 
     mutable std::mutex cmd_mutex_;
     ros::Time last_command_update_;
-    std::vector<double> last_sent_pos_, last_sent_vel_, last_sent_eff_;
 };
 }
