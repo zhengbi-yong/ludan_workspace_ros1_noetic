@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "motor_hw_interface_node");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
+    ros::NodeHandle private_nh("~");
 
     pluginlib::ClassLoader<hardware_interface::RobotHW> loader(
         "damiao_motor_driver", "hardware_interface::RobotHW");
@@ -36,8 +37,8 @@ int main(int argc, char** argv)
 
     double feedback_timeout = 0.1; // seconds
     double cmd_timeout = 0.1;      // seconds
-    nh.param("feedback_timeout", feedback_timeout, feedback_timeout);
-    nh.param("cmd_timeout", cmd_timeout, cmd_timeout);
+    private_nh.param("feedback_timeout", feedback_timeout, feedback_timeout);
+    private_nh.param("cmd_timeout", cmd_timeout, cmd_timeout);
     const ros::Duration feedback_timeout_duration(feedback_timeout);
     const ros::Duration cmd_timeout_duration(cmd_timeout);
 
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
     diag_updater.add("motor_hw_interface_watchdog", diag_cb);
 
     bool shutdown_requested = false;
-    auto safe_stop_srv = nh.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
+    auto safe_stop_srv = private_nh.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
         "safe_stop",
         [&](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) {
             motor_hw->sendSafeMode();
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
         });
 
     double loop_hz = 500.0;
-    nh.param("loop_hz", loop_hz, loop_hz);
+    private_nh.param("loop_hz", loop_hz, loop_hz);
     ros::Rate rate(loop_hz);
 
     ros::Time last_time = ros::Time::now();
