@@ -1,9 +1,9 @@
+#include <boost/make_shared.hpp>
 #include <controller_manager/controller_manager.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <hardware_interface/robot_hw.h>
 #include <limits>
-#include <pluginlib/class_loader.h>
 #include <ros/ros.h>
 #include <std_srvs/Trigger.h>
 
@@ -15,23 +15,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    pluginlib::ClassLoader<hardware_interface::RobotHW> loader(
-        "damiao_motor_driver", "hardware_interface::RobotHW");
-
-    boost::shared_ptr<hardware_interface::RobotHW> hw;
-    try {
-        hw = loader.createInstance("damiao_motor_driver/MotorHWInterface");
-    }
-    catch (const pluginlib::PluginlibException& ex) {
-        ROS_FATAL_STREAM("Failed to create MotorHWInterface: " << ex.what());
-        return 1;
-    }
-
-    auto motor_hw = boost::dynamic_pointer_cast<MotorHWInterface>(hw);
-    if (!motor_hw) {
-        ROS_FATAL("Loaded hardware interface does not match MotorHWInterface type");
-        return 1;
-    }
+    auto motor_hw = boost::make_shared<MotorHWInterface>();
 
     controller_manager::ControllerManager cm(motor_hw.get(), nh);
 
