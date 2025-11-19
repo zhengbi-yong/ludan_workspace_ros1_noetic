@@ -29,19 +29,29 @@ catkin_package(
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
 )
 
-# Ensure the hardware_interface plugin description is available in both the
-# devel and install spaces so pluginlib can discover the MotorHWInterface at
-# runtime.
+# Export the hardware_interface plugin description so pluginlib can discover
+# MotorHWInterface at runtime in both the devel and install spaces.  Older
+# ROS/Pluginlib distributions shipped with catkin don't provide the
+# pluginlib_export_plugin_description_file() helper macro, so fall back to the
+# previous manual copy logic if the macro is unavailable.
 set(_motor_hw_plugin_xml ${CMAKE_CURRENT_SOURCE_DIR}/motor_hw_interface_plugin.xml)
-set(_motor_hw_plugin_dest
-    ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/motor_hw_interface_plugin.xml
-)
-
-# Older ROS installations might not ship the pluginlib CMake helper macro
-# (pluginlib_export_plugin_description_file).  Copy the XML into the devel space
-# manually so that the <export> tag in package.xml still resolves correctly.
-file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION})
-configure_file(${_motor_hw_plugin_xml} ${_motor_hw_plugin_dest} COPYONLY)
+if(COMMAND pluginlib_export_plugin_description_file)
+    pluginlib_export_plugin_description_file(
+        hardware_interface
+        ${_motor_hw_plugin_xml}
+    )
+else()
+    message(WARNING
+        "pluginlib_export_plugin_description_file() is not available; "
+        "manually copying motor_hw_interface_plugin.xml into the devel "
+        "space so pluginlib can discover the MotorHWInterface plugin."
+    )
+    set(_motor_hw_plugin_dest
+        ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/motor_hw_interface_plugin.xml
+    )
+    file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION})
+    configure_file(${_motor_hw_plugin_xml} ${_motor_hw_plugin_dest} COPYONLY)
+endif()
 
 include_directories(
     include
