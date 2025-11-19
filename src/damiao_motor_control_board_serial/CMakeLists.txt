@@ -29,7 +29,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES damiao_motor_control_board_serial
-  CATKIN_DEPENDS roscpp rospy std_msgs serial dynamic_reconfigure
+  CATKIN_DEPENDS roscpp rospy std_msgs serial dynamic_reconfigure message_runtime
 )
 
 include_directories(
