@@ -7,7 +7,7 @@
   -->
 <library path="lib/libmotor_hw_interface">
   <class name="damiao_motor_driver/MotorHWInterface"
-         type="MotorHWInterface"
+         type="damiao_motor_driver::MotorHWInterface"
          base_class_type="hardware_interface::RobotHW">
     <description>
       Hardware interface for Damiao motors.

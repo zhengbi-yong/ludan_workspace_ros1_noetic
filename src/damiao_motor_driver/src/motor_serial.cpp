@@ -7,7 +7,7 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 
 MotorSerial::MotorSerial(ros::NodeHandle& nh)
-    : port_("/dev/ttyACM0"),
+    : port_("/dev/mcu"),
       baud_(921600),
       read_timeout_ms_(50),
       write_timeout_ms_(50),

@@ -13,7 +13,7 @@
 #include <ros/ros.h>
 #include <string>
 #include <vector>
-
+namespace damiao_motor_driver {
 class MotorHWInterface : public hardware_interface::RobotHW
 {
 public:
@@ -70,3 +70,4 @@ private:
     ros::Time last_command_update_;
     std::vector<double> last_sent_pos_, last_sent_vel_, last_sent_eff_;
 };
+}

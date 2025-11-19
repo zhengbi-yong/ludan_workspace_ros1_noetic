@@ -4,7 +4,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <unordered_map>
 #include <XmlRpcValue.h>
-
+namespace damiao_motor_driver {
 MotorHWInterface::MotorHWInterface()
     : MotorHWInterface(ros::NodeHandle("~"))
 {
@@ -291,5 +291,5 @@ void MotorHWInterface::stopDriver()
 {
     driver_.stop();
 }
-
-PLUGINLIB_EXPORT_CLASS(MotorHWInterface, hardware_interface::RobotHW)
+}
+PLUGINLIB_EXPORT_CLASS(damiao_motor_driver::MotorHWInterface, hardware_interface::RobotHW)

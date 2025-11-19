@@ -8,7 +8,7 @@
 #include <std_srvs/Trigger.h>
 
 #include "damiao_motor_driver/motor_hw_interface.h"
-
+using damiao_motor_driver::MotorHWInterface;
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "motor_hw_interface_node");
