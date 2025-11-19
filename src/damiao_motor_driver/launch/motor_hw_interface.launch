@@ -1,6 +1,6 @@
 <launch>
     <arg name="ns" default="motor_hw_interface" />
-    <arg name="port" default="/dev/ttyUSB0" />
+    <arg name="port" default="/dev/mcu" />
     <arg name="baud" default="921600" />
     <arg name="tf_prefix" default="" />
     <arg name="loop_hz" default="500" />

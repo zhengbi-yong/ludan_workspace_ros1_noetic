@@ -292,4 +292,5 @@ void MotorHWInterface::stopDriver()
     driver_.stop();
 }
 }
+
 PLUGINLIB_EXPORT_CLASS(damiao_motor_driver::MotorHWInterface, hardware_interface::RobotHW)

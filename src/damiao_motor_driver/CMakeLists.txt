@@ -24,7 +24,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES motor_driver motor_hw_interface
+    LIBRARIES motor_hw_interface
     CATKIN_DEPENDS roscpp rospy serial diagnostic_updater dynamic_reconfigure
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
 )
