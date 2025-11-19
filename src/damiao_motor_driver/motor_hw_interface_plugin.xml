@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
-<library path="libmotor_hw_interface">
+  <!--
+    The plugin library lives in the catkin package's lib/ directory once
+    it is built or installed.  The previous manifest omitted the "lib/"
+    prefix, which made pluginlib look for the library right in the package
+    root and consequently no class description could be registered.
+  -->
+<library path="lib/libmotor_hw_interface">
   <class name="damiao_motor_driver/MotorHWInterface"
          type="MotorHWInterface"
          base_class_type="hardware_interface::RobotHW">
