@@ -1,0 +1,626 @@
+left_arm_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    - LeftShoulderYaw
+    - LeftElbowPitch
+    - LeftElbowYaw
+    - LeftWristPitch
+    - LeftWristRoll
+  gains:
+    LeftShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+right_arm_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - RightShoulderPitch
+    - RightShoulderRoll
+    - RightShoulderYaw
+    - RightElbowPitch
+    - RightElbowYaw
+    - RightWristPitch
+    - RightWristRoll
+  gains:
+    RightShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+left_leg_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - LeftHipPitch
+    - LeftHipRoll
+    - LeftHipYaw
+    - LeftKnee
+    - LeftAnklePitch
+    - LeftAnkleRoll
+  gains:
+    LeftHipPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftHipRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftHipYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftKnee:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftAnklePitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftAnkleRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+right_leg_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - RightHipPitch
+    - RightHipRoll
+    - RightHipYaw
+    - RightKnee
+    - RightAnklePitch
+    - RightAnkleRoll
+  gains:
+    RightHipPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightHipRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightHipYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightKnee:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightAnklePitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightAnkleRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+neck_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - NeckYaw
+    - NeckRoll
+    - NeckPitch
+  gains:
+    NeckYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+upper_body_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    - LeftShoulderYaw
+    - LeftElbowPitch
+    - LeftElbowYaw
+    - LeftWristPitch
+    - LeftWristRoll
+    - NeckYaw
+    - NeckRoll
+    - NeckPitch
+    - RightShoulderPitch
+    - RightShoulderRoll
+    - RightShoulderYaw
+    - RightElbowPitch
+    - RightElbowYaw
+    - RightWristPitch
+    - RightWristRoll
+  gains:
+    LeftShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+left_arm_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    - LeftShoulderYaw
+    - LeftElbowPitch
+    - LeftElbowYaw
+    - LeftWristPitch
+    - LeftWristRoll
+  gains:
+    LeftShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+right_arm_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - RightShoulderPitch
+    - RightShoulderRoll
+    - RightShoulderYaw
+    - RightElbowPitch
+    - RightElbowYaw
+    - RightWristPitch
+    - RightWristRoll
+  gains:
+    RightShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+neck_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - NeckYaw
+    - NeckRoll
+    - NeckPitch
+  gains:
+    NeckYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+upper_body_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    - LeftShoulderYaw
+    - LeftElbowPitch
+    - LeftElbowYaw
+    - LeftWristPitch
+    - LeftWristRoll
+    - NeckYaw
+    - NeckRoll
+    - NeckPitch
+    - RightShoulderPitch
+    - RightShoulderRoll
+    - RightShoulderYaw
+    - RightElbowPitch
+    - RightElbowYaw
+    - RightWristPitch
+    - RightWristRoll
+  gains:
+    LeftShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+upper_body_velocity_controller:
+  type: velocity_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    - LeftShoulderYaw
+    - LeftElbowPitch
+    - LeftElbowYaw
+    - LeftWristPitch
+    - LeftWristRoll
+    - NeckYaw
+    - NeckRoll
+    - NeckPitch
+    - RightShoulderPitch
+    - RightShoulderRoll
+    - RightShoulderYaw
+    - RightElbowPitch
+    - RightElbowYaw
+    - RightWristPitch
+    - RightWristRoll
+  gains:
+    LeftShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    LeftWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    NeckPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightShoulderYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightElbowYaw:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristPitch:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    RightWristRoll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1

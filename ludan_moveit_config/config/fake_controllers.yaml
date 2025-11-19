@@ -1,0 +1,68 @@
+controller_list:
+  - name: fake_left_arm_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+  - name: fake_right_arm_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+  - name: fake_left_leg_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - LeftHipPitch
+      - LeftHipRoll
+      - LeftHipYaw
+      - LeftKnee
+      - LeftAnklePitch
+      - LeftAnkleRoll
+  - name: fake_right_leg_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - RightHipPitch
+      - RightHipRoll
+      - RightHipYaw
+      - RightKnee
+      - RightAnklePitch
+      - RightAnkleRoll
+  - name: fake_neck_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+  - name: fake_upper_body_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+initial:  # Define initial robot poses per group
+  - group: upper_body
+    pose: zero

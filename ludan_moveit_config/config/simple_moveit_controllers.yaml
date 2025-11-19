@@ -1,0 +1,153 @@
+controller_list:
+  - name: left_arm_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+  - name: right_arm_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+  - name: left_leg_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftHipPitch
+      - LeftHipRoll
+      - LeftHipYaw
+      - LeftKnee
+      - LeftAnklePitch
+      - LeftAnkleRoll
+  - name: right_leg_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - RightHipPitch
+      - RightHipRoll
+      - RightHipYaw
+      - RightKnee
+      - RightAnklePitch
+      - RightAnkleRoll
+  - name: neck_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+  - name: upper_body_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+  - name: left_arm_position_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+  - name: right_arm_position_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+  - name: neck_position_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+  - name: upper_body_position_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll
+  - name: upper_body_velocity_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftShoulderYaw
+      - LeftElbowPitch
+      - LeftElbowYaw
+      - LeftWristPitch
+      - LeftWristRoll
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightShoulderYaw
+      - RightElbowPitch
+      - RightElbowYaw
+      - RightWristPitch
+      - RightWristRoll

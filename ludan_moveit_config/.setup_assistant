@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ludan_v0
+    relative_path: urdf/ludan_v0.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/ludan_v0.srdf
+  CONFIG:
+    author_name: Zhengbi Yong
+    author_email: zhengbi.yong@outlook.com
+    generated_timestamp: 1763547902

@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="ludan_v0">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="left_arm">
+        <link name="LeftShoulderPitch"/>
+        <link name="LeftShoulderRoll"/>
+        <link name="LeftShoulderYaw"/>
+        <link name="LeftElbowPitch"/>
+        <link name="LeftElbowYaw"/>
+        <link name="LeftWristPitch"/>
+        <link name="LeftWristRoll"/>
+        <joint name="LeftShoulderPitch"/>
+        <joint name="LeftShoulderRoll"/>
+        <joint name="LeftShoulderYaw"/>
+        <joint name="LeftElbowPitch"/>
+        <joint name="LeftElbowYaw"/>
+        <joint name="LeftWristPitch"/>
+        <joint name="LeftWristRoll"/>
+        <chain base_link="LeftShoulderPitch" tip_link="LeftWristRoll"/>
+    </group>
+    <group name="right_arm">
+        <link name="RightShoulderPitch"/>
+        <link name="RightShoulderRoll"/>
+        <link name="RightShoulderYaw"/>
+        <link name="RightElbowPitch"/>
+        <link name="RightElbowYaw"/>
+        <link name="RightWristPitch"/>
+        <link name="RightWristRoll"/>
+        <joint name="RightShoulderPitch"/>
+        <joint name="RightShoulderRoll"/>
+        <joint name="RightShoulderYaw"/>
+        <joint name="RightElbowPitch"/>
+        <joint name="RightElbowYaw"/>
+        <joint name="RightWristPitch"/>
+        <joint name="RightWristRoll"/>
+        <chain base_link="RightShoulderPitch" tip_link="RightWristRoll"/>
+    </group>
+    <group name="left_leg">
+        <link name="LeftHipPitch"/>
+        <link name="LeftHipRoll"/>
+        <link name="LeftHipYaw"/>
+        <link name="LeftKnee"/>
+        <link name="LeftAnklePitch"/>
+        <link name="LeftAnkleRoll"/>
+        <joint name="LeftHipPitch"/>
+        <joint name="LeftHipRoll"/>
+        <joint name="LeftHipYaw"/>
+        <joint name="LeftKnee"/>
+        <joint name="LeftAnklePitch"/>
+        <joint name="LeftAnkleRoll"/>
+        <chain base_link="LeftHipPitch" tip_link="LeftAnkleRoll"/>
+    </group>
+    <group name="right_leg">
+        <link name="RightHipPitch"/>
+        <link name="RightHipRoll"/>
+        <link name="RightHipYaw"/>
+        <link name="RightKnee"/>
+        <link name="RightAnklePitch"/>
+        <link name="RightAnkleRoll"/>
+        <joint name="RightHipPitch"/>
+        <joint name="RightHipRoll"/>
+        <joint name="RightHipYaw"/>
+        <joint name="RightKnee"/>
+        <joint name="RightAnklePitch"/>
+        <joint name="RightAnkleRoll"/>
+        <chain base_link="RightHipPitch" tip_link="RightAnkleRoll"/>
+    </group>
+    <group name="neck">
+        <link name="NeckYaw"/>
+        <link name="NeckRoll"/>
+        <link name="NeckPitch"/>
+        <joint name="NeckYaw"/>
+        <joint name="NeckRoll"/>
+        <joint name="NeckPitch"/>
+        <chain base_link="NeckYaw" tip_link="NeckPitch"/>
+    </group>
+    <group name="upper_body">
+        <group name="left_arm"/>
+        <group name="right_arm"/>
+        <group name="neck"/>
+    </group>
+    <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
+    <group_state name="zero" group="upper_body">
+        <joint name="LeftElbowPitch" value="0"/>
+        <joint name="LeftElbowYaw" value="0"/>
+        <joint name="LeftShoulderPitch" value="0"/>
+        <joint name="LeftShoulderRoll" value="0"/>
+        <joint name="LeftShoulderYaw" value="0"/>
+        <joint name="LeftWristPitch" value="0"/>
+        <joint name="LeftWristRoll" value="0"/>
+        <joint name="NeckPitch" value="0"/>
+        <joint name="NeckRoll" value="0"/>
+        <joint name="NeckYaw" value="0"/>
+        <joint name="RightElbowPitch" value="0"/>
+        <joint name="RightElbowYaw" value="0"/>
+        <joint name="RightShoulderPitch" value="0"/>
+        <joint name="RightShoulderRoll" value="0"/>
+        <joint name="RightShoulderYaw" value="0"/>
+        <joint name="RightWristPitch" value="0"/>
+        <joint name="RightWristRoll" value="0"/>
+    </group_state>
+    <group_state name="drophand" group="upper_body">
+        <joint name="LeftElbowPitch" value="-1.5"/>
+        <joint name="LeftElbowYaw" value="0"/>
+        <joint name="LeftShoulderPitch" value="0"/>
+        <joint name="LeftShoulderRoll" value="0.13"/>
+        <joint name="LeftShoulderYaw" value="0"/>
+        <joint name="LeftWristPitch" value="0"/>
+        <joint name="LeftWristRoll" value="0"/>
+        <joint name="NeckPitch" value="0"/>
+        <joint name="NeckRoll" value="0"/>
+        <joint name="NeckYaw" value="0"/>
+        <joint name="RightElbowPitch" value="1.5"/>
+        <joint name="RightElbowYaw" value="0"/>
+        <joint name="RightShoulderPitch" value="0"/>
+        <joint name="RightShoulderRoll" value="-0.13"/>
+        <joint name="RightShoulderYaw" value="0"/>
+        <joint name="RightWristPitch" value="0"/>
+        <joint name="RightWristRoll" value="0"/>
+    </group_state>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="left_hand" parent_link="LeftWristRoll" group="left_arm" parent_group="left_arm"/>
+    <end_effector name="right_hand" parent_link="RightWristRoll" group="right_arm" parent_group="right_arm"/>
+    <end_effector name="head" parent_link="NeckPitch" group="neck" parent_group="neck"/>
+    <end_effector name="left_foot" parent_link="LeftAnkleRoll" group="left_leg" parent_group="left_leg"/>
+    <end_effector name="right_foot" parent_link="RightAnkleRoll" group="right_leg" parent_group="right_leg"/>
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="Body" link2="LeftAnklePitch" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftAnkleRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftHipPitch" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftHipRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftHipYaw" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftKnee" reason="Never"/>
+    <disable_collisions link1="Body" link2="LeftShoulderPitch" reason="Adjacent"/>
+    <disable_collisions link1="Body" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="NeckYaw" reason="Adjacent"/>
+    <disable_collisions link1="Body" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="Body" link2="RightShoulderPitch" reason="Adjacent"/>
+    <disable_collisions link1="Body" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="Body" link2="WaistYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftAnkleRoll" reason="Adjacent"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftKnee" reason="Adjacent"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnklePitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftKnee" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftAnkleRoll" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftElbowYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftKnee" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftShoulderYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="LeftWristRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowPitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="LeftWristPitch" reason="Adjacent"/>
+    <disable_collisions link1="LeftElbowYaw" link2="LeftWristRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftElbowYaw" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftHipRoll" reason="Adjacent"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftKnee" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipPitch" link2="WaistYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftHipRoll" link2="LeftHipYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftHipRoll" link2="LeftKnee" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipRoll" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="LeftKnee" reason="Adjacent"/>
+    <disable_collisions link1="LeftHipYaw" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftHipYaw" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="LeftShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="LeftShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftKnee" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="LeftShoulderRoll" reason="Adjacent"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="LeftShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="LeftWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderPitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="LeftShoulderYaw" reason="Adjacent"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="LeftWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderRoll" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="NeckPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="LeftShoulderYaw" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="LeftWristRoll" reason="Adjacent"/>
+    <disable_collisions link1="LeftWristPitch" link2="NeckRoll" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="NeckYaw" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="LeftWristPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="NeckRoll" reason="Adjacent"/>
+    <disable_collisions link1="NeckPitch" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="NeckPitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="NeckYaw" reason="Adjacent"/>
+    <disable_collisions link1="NeckRoll" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="NeckRoll" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightAnklePitch" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightAnkleRoll" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightElbowPitch" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightElbowYaw" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="NeckYaw" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightAnkleRoll" reason="Adjacent"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightKnee" reason="Adjacent"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightAnklePitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightAnkleRoll" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightElbowYaw" reason="Adjacent"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightHipPitch" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightHipRoll" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightShoulderYaw" reason="Adjacent"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="RightWristRoll" reason="Never"/>
+    <disable_collisions link1="RightElbowPitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightElbowYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightElbowYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightElbowYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightElbowYaw" link2="RightWristPitch" reason="Adjacent"/>
+    <disable_collisions link1="RightElbowYaw" link2="RightWristRoll" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="RightHipRoll" reason="Adjacent"/>
+    <disable_collisions link1="RightHipPitch" link2="RightHipYaw" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightHipPitch" link2="WaistYaw" reason="Adjacent"/>
+    <disable_collisions link1="RightHipRoll" link2="RightHipYaw" reason="Adjacent"/>
+    <disable_collisions link1="RightHipRoll" link2="RightKnee" reason="Never"/>
+    <disable_collisions link1="RightHipRoll" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightHipRoll" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightHipRoll" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightHipYaw" link2="RightKnee" reason="Adjacent"/>
+    <disable_collisions link1="RightHipYaw" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightHipYaw" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightHipYaw" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightHipYaw" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightKnee" link2="RightShoulderPitch" reason="Never"/>
+    <disable_collisions link1="RightKnee" link2="RightShoulderRoll" reason="Never"/>
+    <disable_collisions link1="RightKnee" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightKnee" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightShoulderPitch" link2="RightShoulderRoll" reason="Adjacent"/>
+    <disable_collisions link1="RightShoulderPitch" link2="RightShoulderYaw" reason="Never"/>
+    <disable_collisions link1="RightShoulderPitch" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="RightShoulderPitch" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightShoulderRoll" link2="RightShoulderYaw" reason="Adjacent"/>
+    <disable_collisions link1="RightShoulderRoll" link2="RightWristPitch" reason="Never"/>
+    <disable_collisions link1="RightShoulderRoll" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightShoulderYaw" link2="WaistYaw" reason="Never"/>
+    <disable_collisions link1="RightWristPitch" link2="RightWristRoll" reason="Adjacent"/>
+</robot>
