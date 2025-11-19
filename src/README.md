@@ -91,45 +91,66 @@ rostopic echo /motor_hw_interface/motor_states
 
 以下流程假设你已经有对应机械臂的 `moveit_config` 包（例如 `my_robot_moveit_config`），其中使用 `ros_control` 作为控制器管理后端。
 
-### 1. 启动 MotorHWInterface
+### 操作总览
 
-保持上一节的 `motor_hw_with_effort_controller.launch` 运行，确保 `joint_state_controller` 与 `joint_group_effort_controller` 已被 spawn。
+1. **驱动/硬件接口**：启动 `motor_hw_interface_node` 并加载力矩控制器，向外提供标准的 `follow_joint_trajectory` action。【F:src/damiao_motor_driver/launch/motor_hw_with_effort_controller.launch†L1-L25】
+2. **MoveIt 控制器配置**：在 `moveit_config` 中声明 `joint_group_effort_controller`，确保 `move_group` 能把规划的轨迹投递给 `ros_control`。【F:src/damiao_motor_driver/cfg/effort_controllers.yaml†L1-L33】
+3. **MoveIt 规划执行**：启动 `moveit_planning_execution` 与 `moveit_rviz`，在 RViz 中进行规划并执行到真实硬件。
 
-### 2. 准备 MoveIt 控制器配置
+### 详细步骤：使用 MoveIt 驱动达妙电机
 
-在你的 `my_robot_moveit_config/config/ros_controllers.yaml`（或同等文件）中添加：
-```yaml
-controller_manager_ns: /motor_hw_interface
-controller_list:
-  - name: joint_group_effort_controller
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
-    default: true
-    joints:
-      - joint_0
-      - joint_1
-      # ... 按实际使用的关节子集填写
-```
-若使用 MoveIt 默认的 `moveit_controller_manager.launch.xml`，请将 `controller_manager_ns`、`controller_list` 指向上面的配置，以便 `move_group` 通过 `follow_joint_trajectory` action 将规划结果发送给 `joint_group_effort_controller/command`。
+1. **准备工作空间与硬件**  
+   - 按“环境依赖”“编译工作空间”“硬件连接”章节完成 `catkin_make`、串口授权等准备。  
+   - 确认控制板在 `/dev/ttyACM0`（或自定义）可用，并记录波特率。
 
-### 3. 启动 MoveIt 规划与执行
+2. **启动 MotorHWInterface + 控制器**  
+   在第一个终端中执行：
+   ```bash
+   roslaunch damiao_motor_driver motor_hw_with_effort_controller.launch \
+     port:=/dev/ttyACM0 baud:=921600 loop_hz:=500
+   ```
+   该 launch 会：
+   - 加载 `MotorHWInterface` 插件，并在 `/motor_hw_interface` 命名空间下发布 `joint_states`、`motor_states` 以及 `follow_joint_trajectory` action。  
+   - 通过 `controller_manager` 启动 `joint_state_controller` 与 `joint_group_effort_controller`，`/motor_hw_interface/follow_joint_trajectory` 即是 MoveIt 将要连接的 action 服务器。【F:src/damiao_motor_driver/launch/motor_hw_with_effort_controller.launch†L1-L25】
+   - 可使用 `rosservice call /motor_hw_interface/controller_manager/list_controllers` 验证控制器状态为 `running`。【F:src/damiao_motor_driver/src/motor_hw_interface_node.cpp†L33-L106】
 
-在另一个终端：
-```bash
-roslaunch my_robot_moveit_config moveit_planning_execution.launch \
-  moveit_controller_manager:=ros_control \
-  trajectory_execution.allowed_execution_duration_scaling:=1.5
-```
-随后可通过：
-```bash
-roslaunch my_robot_moveit_config moveit_rviz.launch
-```
-打开 RViz，使用 MoveIt MotionPlanning 插件：
-1. 在 `Planning` 面板选择对应的规划组。
-2. 点击 `Plan` 生成轨迹，确认轨迹在 RViz 中预览正常。
-3. 点击 `Plan & Execute`，MoveIt 会把轨迹发布到 `/motor_hw_interface/follow_joint_trajectory` action，由 `joint_group_effort_controller` 转为力矩指令。
+3. **配置 MoveIt 控制器**  
+   在你的 `my_robot_moveit_config/config/ros_controllers.yaml`（或等效文件）中添加/确认以下内容：
+   ```yaml
+   controller_manager_ns: /motor_hw_interface
+   controller_list:
+     - name: joint_group_effort_controller
+       action_ns: follow_joint_trajectory
+       type: FollowJointTrajectory
+       default: true
+       joints:
+         - joint_0
+         - joint_1
+         # ... 按照机械臂实际使用的关节顺序填写
+   ```
+   同时确保 MoveIt 的 `moveit_controller_manager.launch.xml` 或 `move_group.launch` 将 `ros_controllers.yaml` 作为参数传入，使 `move_group` 知道去 `/motor_hw_interface` 命名空间下寻找 action。若 URDF/MoveIt 使用自定义关节名，可在 `motor_hw_interface.launch` 中设置 `joint_prefix/tf_prefix` 以保持一致。【F:src/damiao_motor_driver/config/controllers.yaml†L1-L9】
 
-### 4. 常见排障
+4. **启动 MoveIt 并连接 RViz**  
+   在第二个终端中：
+   ```bash
+   roslaunch my_robot_moveit_config moveit_planning_execution.launch \
+     moveit_controller_manager:=ros_control \
+     trajectory_execution.allowed_execution_duration_scaling:=1.5
+   ```
+   若需要可视化/交互规划，再开一个终端运行：
+   ```bash
+   roslaunch my_robot_moveit_config moveit_rviz.launch
+   ```
+   在 RViz → MotionPlanning 插件中：
+   - 选择机械臂的规划组，点击 **Plan** 预览轨迹。  
+   - 点击 **Plan & Execute**，MoveIt 会将轨迹发送到 `/motor_hw_interface/follow_joint_trajectory`，由 `joint_group_effort_controller` 转换成力矩指令并下发给达妙电机。
+
+5. **运行时监控与排障**  
+   - 如果 MoveIt 提示“找不到控制器”，请重新检查 `controller_manager_ns` 是否指向 `/motor_hw_interface/controller_manager`，并确认 `joint_group_effort_controller` 已运行。  
+   - 若 RViz 规划的关节名与驱动不一致，可通过 `joint_prefix`/`tf_prefix` 参数对齐名称，或在 MoveIt 配置中调整。  
+   - 若执行异常或触发安全模式时，可使用 `rqt_reconfigure` 调整 `kp_limit/kd_limit/torque_limit`，或调用 `rosservice call /motor_hw_interface/safe_stop` 立即停机。【F:src/damiao_motor_driver/cfg/driver_limits.cfg†L1-L13】【F:src/damiao_motor_driver/src/motor_hw_interface_node.cpp†L60-L88】
+
+### 常见排障
 
 - **MoveIt 报告找不到控制器**：确认 `controller_manager_ns` 指向 `/motor_hw_interface/controller_manager`，并且 `list_controllers` 中存在 `joint_group_effort_controller` 且状态为 `running`。
 - **关节名称不匹配**：`MotorHWInterface` 默认提供 `joint_0...joint_29`，请确保 URDF / MoveIt 配置使用同名关节或在 `joint_prefix` 参数中设置转换（参见 `motor_hw_interface.launch` 中的 `tf_prefix`/`joint_prefix`）。【F:src/damiao_motor_driver/include/damiao_motor_driver/motor_hw_interface.h†L33-L55】
