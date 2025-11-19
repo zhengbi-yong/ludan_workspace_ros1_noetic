@@ -29,9 +29,19 @@ catkin_package(
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
 )
 
-# Ensure the hardware_interface plugin description is exported into the devel and
-# install spaces so pluginlib can discover the MotorHWInterface at runtime.
-pluginlib_export_plugin_description_file(hardware_interface motor_hw_interface_plugin.xml)
+# Ensure the hardware_interface plugin description is available in both the
+# devel and install spaces so pluginlib can discover the MotorHWInterface at
+# runtime.
+set(_motor_hw_plugin_xml ${CMAKE_CURRENT_SOURCE_DIR}/motor_hw_interface_plugin.xml)
+set(_motor_hw_plugin_dest
+    ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/motor_hw_interface_plugin.xml
+)
+
+# Older ROS installations might not ship the pluginlib CMake helper macro
+# (pluginlib_export_plugin_description_file).  Copy the XML into the devel space
+# manually so that the <export> tag in package.xml still resolves correctly.
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION})
+configure_file(${_motor_hw_plugin_xml} ${_motor_hw_plugin_dest} COPYONLY)
 
 include_directories(
     include
