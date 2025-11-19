@@ -7,6 +7,8 @@
     <arg name="controller_config" default="$(find damiao_motor_driver)/config/controllers.yaml" />
 
     <group ns="$(arg ns)">
+        <rosparam command="load" file="$(arg controller_config)" />
+
         <node pkg="damiao_motor_driver"
               type="motor_hw_interface_node"
               name="motor_hw_interface"
@@ -15,8 +17,6 @@
             <param name="baud" value="$(arg baud)" />
             <param name="tf_prefix" value="$(arg tf_prefix)" />
             <param name="loop_hz" value="$(arg loop_hz)" />
-
-            <rosparam command="load" file="$(arg controller_config)" />
         </node>
 
         <node pkg="controller_manager"
