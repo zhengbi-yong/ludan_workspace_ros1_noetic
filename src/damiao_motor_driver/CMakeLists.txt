@@ -29,6 +29,10 @@ catkin_package(
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
 )
 
+# Ensure the hardware_interface plugin description is exported into the devel and
+# install spaces so pluginlib can discover the MotorHWInterface at runtime.
+pluginlib_export_plugin_description_file(hardware_interface motor_hw_interface_plugin.xml)
+
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
