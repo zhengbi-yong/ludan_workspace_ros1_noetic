@@ -1,0 +1,6 @@
+int32  id
+float32 p
+float32 v
+float32 kp
+float32 kd
+float32 torque

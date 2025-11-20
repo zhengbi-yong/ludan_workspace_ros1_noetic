@@ -15,11 +15,22 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     geometry_msgs
     rosbag
+    message_generation
     damiao_motor_control_board_serial
 )
 
 generate_dynamic_reconfigure_options(
     cfg/driver_limits.cfg
+)
+add_message_files(
+    FILES
+    MotorCommand.msg           # 你刚刚新建的消息
+    # 以后有其他 msg 也可以加在这里
+)
+
+generate_messages(
+    DEPENDENCIES
+    std_msgs
 )
 
 catkin_package(
@@ -27,6 +38,7 @@ catkin_package(
     LIBRARIES motor_hw_interface
     CATKIN_DEPENDS roscpp rospy serial diagnostic_updater dynamic_reconfigure
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
+        message_runtime
 )
 
 # Export the hardware_interface plugin description so pluginlib can discover
@@ -68,7 +80,7 @@ add_library(motor_driver
 target_link_libraries(motor_driver
     ${catkin_LIBRARIES}
 )
-add_dependencies(motor_driver ${PROJECT_NAME}_gencfg)
+
 
 # ros_control 插件
 add_library(motor_hw_interface
@@ -78,7 +90,7 @@ target_link_libraries(motor_hw_interface
     motor_driver
     ${catkin_LIBRARIES}
 )
-add_dependencies(motor_hw_interface ${PROJECT_NAME}_gencfg)
+
 
 # ros_control 硬件接口节点
 add_executable(motor_hw_interface_node src/motor_hw_interface_node.cpp)
@@ -107,6 +119,41 @@ target_link_libraries(trajectory_controller_node
     motor_driver
     ${catkin_LIBRARIES}
 )
+# 话题控制桥接节点：订阅 /motor_cmd -> 调用 MotorDriver::send_cmd
+add_executable(motor_cmd_bridge_node src/motor_cmd_bridge.cpp)
+target_link_libraries(motor_cmd_bridge_node
+    motor_driver
+    ${catkin_LIBRARIES}
+)
+add_dependencies(motor_cmd_bridge_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+
+add_dependencies(motor_driver
+    ${PROJECT_NAME}_gencfg
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(motor_hw_interface
+    ${PROJECT_NAME}_gencfg
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+
+add_dependencies(motor_driver_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+
+add_dependencies(send_single_motor_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(trajectory_controller_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
 
 if (CATKIN_ENABLE_TESTING)
     catkin_add_gtest(motor_protocol_test test/protocol_test.cpp)
@@ -122,6 +169,7 @@ endif()
 install(TARGETS motor_driver motor_hw_interface motor_driver_node
                 motor_hw_interface_node
                 send_single_motor_node trajectory_controller_node
+                motor_cmd_bridge_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 

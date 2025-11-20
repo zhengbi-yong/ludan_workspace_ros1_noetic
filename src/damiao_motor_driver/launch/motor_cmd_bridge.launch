@@ -1,0 +1,18 @@
+<launch>
+    <arg name="ns" default="motor_driver" />
+    <arg name="tf_prefix" default="" />
+    <arg name="port" default="/dev/ttyACM0" />
+    <arg name="baud" default="921600" />
+
+    <group ns="$(arg ns)">
+        <node pkg="damiao_motor_driver"
+              type="motor_cmd_bridge_node"
+              name="motor_cmd_bridge"
+              output="screen">
+            <param name="tf_prefix" value="$(arg tf_prefix)" />
+            <param name="port" value="$(arg port)" />
+            <param name="baud" value="$(arg baud)" />
+        </node>
+    </group>
+</launch>
+

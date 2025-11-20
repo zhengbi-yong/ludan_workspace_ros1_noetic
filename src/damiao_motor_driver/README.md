@@ -31,6 +31,34 @@ rostopic pub /motor_driver/joint_group_effort_controller/command std_msgs/Float6
 ```
 确保消息长度与启用的关节数量一致即可驱动对应电机。
 
+## 通过 rostopic pub 控制电机
+`motor_cmd_bridge_node` 提供了通过 ROS 话题直接控制电机的功能。启动节点后，可以通过 `rostopic pub` 命令或自定义节点向 `/motor_cmd` 话题发布命令来控制电机。
+
+**启动节点：**
+```bash
+roslaunch damiao_motor_driver motor_cmd_bridge.launch port:=/dev/ttyACM0 baud:=921600
+```
+
+**通过命令行控制电机：**
+```bash
+rostopic pub /motor_cmd damiao_motor_driver/MotorCommand \
+  "{id: 0, p: 0.3, v: 0.0, kp: 20.0, kd: 1.0, torque: 0.0}" -r 200
+```
+
+参数说明：
+- `id`: 电机 ID（0-29）
+- `p`: 目标位置（弧度）
+- `v`: 目标速度（弧度/秒）
+- `kp`: 位置增益
+- `kd`: 速度增益
+- `torque`: 力矩（Nm）
+- `-r 200`: 以 200 Hz 频率持续发布
+
+**通过自定义节点控制：**
+其他 ROS 节点可以订阅 `/motor_cmd` 话题并发布 `damiao_motor_driver/MotorCommand` 消息来控制电机。
+
+注意：`motor_cmd_bridge_node` 和 `motor_driver_node` 不能同时运行，因为它们都需要独占串口。如果只需要通过话题控制电机，使用 `motor_cmd_bridge_node` 即可。
+
 ## 单路电机通断测试
 若仅需验证单个电机收发是否正常，可使用内置节点持续向指定 ID 发送零力矩指令：
 ```bash
