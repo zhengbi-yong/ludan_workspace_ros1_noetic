@@ -6,6 +6,10 @@
     <arg name="loop_hz" default="500" />
     <arg name="controller_config" default="$(find damiao_motor_driver)/config/controllers.yaml" />
 
+    <!-- Load controller parameters into the hardware interface namespace
+         before the controller manager spawner starts. -->
+    <rosparam command="load" ns="$(arg ns)" file="$(arg controller_config)" />
+
     <group ns="$(arg ns)">
         <node pkg="damiao_motor_driver"
               type="motor_hw_interface_node"
@@ -15,8 +19,12 @@
             <param name="baud" value="$(arg baud)" />
             <param name="tf_prefix" value="$(arg tf_prefix)" />
             <param name="loop_hz" value="$(arg loop_hz)" />
-
-            <rosparam command="load" file="$(arg controller_config)" />
         </node>
+
+        <node pkg="controller_manager"
+              type="spawner"
+              name="controller_spawner"
+              output="screen"
+              args="joint_state_controller effort_group_controller" />
     </group>
 </launch>

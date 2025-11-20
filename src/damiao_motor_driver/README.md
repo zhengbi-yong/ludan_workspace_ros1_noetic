@@ -12,15 +12,24 @@
    - `baud`：串口波特率，默认 `921600`。
    - 如有多套设备，可通过 `ns` 与 `tf_prefix` 参数在不同命名空间下重复启动。
 
-驱动启动后将周期性发布两类话题：
+驱动启动后会自动通过 `controller_manager` 加载 `joint_state_controller` 与 `joint_group_effort_controller`。因此除了反馈话题，还会额外暴露以下接口：
+
 - `motor_states` (`damiao_motor_control_board_serial/MotorStates`)：包含 30 路电机的 `pos/vel/tor` 反馈。
 - `status` (`diagnostic_msgs/DiagnosticArray`)：串口连接状态、丢包率、重连次数等健康度信息。
+- `joint_group_effort_controller/command` (`std_msgs/Float64MultiArray`)：力矩控制指令，数组顺序与 `controllers.yaml` 中的 `joints` 列表一致，可通过 `rostopic pub` 或自定义节点写入。
 
 可通过以下命令观测：
 ```bash
 rostopic echo /motor_driver/motor_states
 rostopic echo /motor_driver/status
+rostopic list | grep joint_group_effort_controller
 ```
+
+若希望手动测试输出，可执行：
+```bash
+rostopic pub /motor_driver/joint_group_effort_controller/command std_msgs/Float64MultiArray "data: [0.3, 0, 0, ...]"
+```
+确保消息长度与启用的关节数量一致即可驱动对应电机。
 
 ## 单路电机通断测试
 若仅需验证单个电机收发是否正常，可使用内置节点持续向指定 ID 发送零力矩指令：
