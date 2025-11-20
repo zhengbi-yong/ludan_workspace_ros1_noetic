@@ -12,7 +12,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/Body.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/Body.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -21,7 +21,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/Body.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/Body.STL" />
             </geometry>
         </collision>
     </link>
@@ -34,7 +34,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -43,7 +43,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -63,7 +63,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -72,7 +72,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -92,7 +92,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -101,7 +101,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightShoulderYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightShoulderYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -121,7 +121,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightElbowPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightElbowPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -130,7 +130,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightElbowPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightElbowPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -150,7 +150,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightElbowYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightElbowYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.75294 0.75294 0.75294 1" />
@@ -159,7 +159,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightElbowYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightElbowYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -179,7 +179,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightWristPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightWristPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.75294 0.75294 0.75294 1" />
@@ -188,7 +188,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightWristPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightWristPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -208,7 +208,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightWristRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightWristRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -217,7 +217,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightWristRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightWristRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -237,7 +237,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -246,7 +246,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -266,7 +266,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -275,7 +275,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -295,7 +295,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -304,7 +304,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftShoulderYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftShoulderYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -324,7 +324,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftElbowPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftElbowPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -333,7 +333,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftElbowPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftElbowPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -353,7 +353,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftElbowYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftElbowYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.75294 0.75294 0.75294 1" />
@@ -362,7 +362,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftElbowYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftElbowYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -382,7 +382,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftWristPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftWristPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -391,7 +391,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftWristPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftWristPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -411,7 +411,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftWristRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftWristRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -420,7 +420,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftWristRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftWristRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -440,7 +440,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/WaistYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/WaistYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.86667 0.86667 0.8902 1" />
@@ -449,7 +449,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/WaistYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/WaistYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -469,7 +469,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -478,7 +478,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -498,7 +498,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.86667 0.86667 0.8902 1" />
@@ -507,7 +507,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -527,7 +527,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -536,7 +536,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightHipYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightHipYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -556,7 +556,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightKnee.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightKnee.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -565,7 +565,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightKnee.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightKnee.STL" />
             </geometry>
         </collision>
     </link>
@@ -585,7 +585,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightAnklePitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightAnklePitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -594,7 +594,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightAnklePitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightAnklePitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -614,7 +614,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightAnkleRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightAnkleRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -623,7 +623,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/RightAnkleRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/RightAnkleRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -643,7 +643,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -652,7 +652,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -672,7 +672,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.86667 0.86667 0.8902 1" />
@@ -681,7 +681,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -701,7 +701,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -710,7 +710,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftHipYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftHipYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -730,7 +730,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftKnee.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftKnee.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -739,7 +739,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftKnee.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftKnee.STL" />
             </geometry>
         </collision>
     </link>
@@ -759,7 +759,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftAnklePitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftAnklePitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -768,7 +768,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftAnklePitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftAnklePitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -788,7 +788,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftAnkleRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftAnkleRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="0.89804 0.91765 0.92941 1" />
@@ -797,7 +797,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/LeftAnkleRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/LeftAnkleRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -817,7 +817,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckYaw.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -826,7 +826,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckYaw.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckYaw.STL" />
             </geometry>
         </collision>
     </link>
@@ -846,7 +846,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckRoll.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -855,7 +855,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckRoll.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckRoll.STL" />
             </geometry>
         </collision>
     </link>
@@ -875,7 +875,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckPitch.STL" />
             </geometry>
             <material name="">
                 <color rgba="1 1 1 1" />
@@ -884,7 +884,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://ludan_v0/meshes/NeckPitch.STL" />
+                <mesh filename="package://ludan_v0/simplified_meshes/NeckPitch.STL" />
             </geometry>
         </collision>
     </link>
@@ -898,140 +898,140 @@
     <transmission name="trans_RightShoulderPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightShoulderPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightShoulderPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightShoulderRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightShoulderRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightShoulderRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightShoulderYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightShoulderYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightShoulderYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightElbowPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightElbowPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightElbowPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightElbowYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightElbowYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightElbowYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightWristPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightWristPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightWristPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightWristRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightWristRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightWristRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftShoulderPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftShoulderPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftShoulderPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftShoulderRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftShoulderRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftShoulderRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftShoulderYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftShoulderYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftShoulderYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftElbowPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftElbowPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftElbowPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftElbowYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftElbowYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftElbowYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftWristPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftWristPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftWristPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftWristRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftWristRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftWristRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -1048,150 +1048,150 @@
     <transmission name="trans_RightHipPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightHipPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightHipPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightHipRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightHipRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightHipRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightHipYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightHipYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightHipYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightKnee">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightKnee">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightKnee_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightAnklePitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightAnklePitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightAnklePitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_RightAnkleRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="RightAnkleRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="RightAnkleRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftHipPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftHipPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftHipPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftHipRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftHipRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftHipRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftHipYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftHipYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftHipYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftKnee">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftKnee">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftKnee_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftAnklePitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftAnklePitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftAnklePitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_LeftAnkleRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="LeftAnkleRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="LeftAnkleRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_NeckYaw">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="NeckYaw">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="NeckYaw_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_NeckRoll">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="NeckRoll">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="NeckRoll_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
     <transmission name="trans_NeckPitch">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="NeckPitch">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="NeckPitch_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>

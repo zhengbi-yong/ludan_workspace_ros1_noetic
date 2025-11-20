@@ -19,6 +19,12 @@ controller_list:
       - RightElbowYaw
       - RightWristPitch
       - RightWristRoll
+  - name: fake_neck_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - NeckYaw
+      - NeckRoll
+      - NeckPitch
   - name: fake_left_leg_controller
     type: $(arg fake_execution_type)
     joints:
@@ -37,32 +43,8 @@ controller_list:
       - RightKnee
       - RightAnklePitch
       - RightAnkleRoll
-  - name: fake_neck_controller
-    type: $(arg fake_execution_type)
-    joints:
-      - NeckYaw
-      - NeckRoll
-      - NeckPitch
-  - name: fake_upper_body_controller
-    type: $(arg fake_execution_type)
-    joints:
-      - LeftShoulderPitch
-      - LeftShoulderRoll
-      - LeftShoulderYaw
-      - LeftElbowPitch
-      - LeftElbowYaw
-      - LeftWristPitch
-      - LeftWristRoll
-      - NeckYaw
-      - NeckRoll
-      - NeckPitch
-      - RightShoulderPitch
-      - RightShoulderRoll
-      - RightShoulderYaw
-      - RightElbowPitch
-      - RightElbowYaw
-      - RightWristPitch
-      - RightWristRoll
 initial:  # Define initial robot poses per group
-  - group: upper_body
-    pose: zero
+#  - group: left_arm
+#    pose: home
+
+  []

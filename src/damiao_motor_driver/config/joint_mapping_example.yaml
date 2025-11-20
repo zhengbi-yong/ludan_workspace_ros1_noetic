@@ -1,0 +1,143 @@
+# 关节名称到电机 ID 的映射配置示例
+# 这个文件展示了如何将 MoveIt 的关节名称映射到实际的电机 ID
+# 实际使用时，需要根据你的机器人配置修改这些映射关系
+
+# 在 motor_hw_interface 的 launch 文件中，可以通过 rosparam 加载这个配置
+# 例如：<rosparam file="$(find damiao_motor_driver)/config/joint_mapping_example.yaml" ns="motor_hw_interface" />
+
+# 关节配置数组，每个关节包含：
+# - name: 关节名称（必须与 MoveIt 配置中的关节名称一致）
+# - id: 对应的电机 ID（0-29）
+# - kp: 位置增益（可选，默认使用 default_kp）
+# - kd: 速度增益（可选，默认使用 default_kd）
+
+joints:
+  # 左臂关节（示例映射，需要根据实际硬件调整）
+  - name: LeftShoulderPitch
+    id: 20
+    kp: 20.0
+    kd: 1.0
+  - name: LeftShoulderRoll
+    id: 21
+    kp: 20.0
+    kd: 1.0
+  - name: LeftShoulderYaw
+    id: 22
+    kp: 20.0
+    kd: 1.0
+  - name: LeftElbowPitch
+    id: 23
+    kp: 20.0
+    kd: 1.0
+  - name: LeftElbowYaw
+    id: 24
+    kp: 20.0
+    kd: 1.0
+  - name: LeftWristPitch
+    id: 25
+    kp: 20.0
+    kd: 1.0
+  - name: LeftWristRoll
+    id: 26
+    kp: 20.0
+    kd: 1.0
+
+  # 右臂关节（示例映射，需要根据实际硬件调整）
+  - name: RightShoulderPitch
+    id: 30
+    kp: 20.0
+    kd: 1.0
+  - name: RightShoulderRoll
+    id: 8
+    kp: 20.0
+    kd: 1.0
+  - name: RightShoulderYaw
+    id: 9
+    kp: 20.0
+    kd: 1.0
+  - name: RightElbowPitch
+    id: 10
+    kp: 20.0
+    kd: 1.0
+  - name: RightElbowYaw
+    id: 11
+    kp: 20.0
+    kd: 1.0
+  - name: RightWristPitch
+    id: 12
+    kp: 20.0
+    kd: 1.0
+  - name: RightWristRoll
+    id: 13
+    kp: 20.0
+    kd: 1.0
+
+  # 左腿关节（示例映射，需要根据实际硬件调整）
+  - name: LeftHipPitch
+    id: 14
+    kp: 20.0
+    kd: 1.0
+  - name: LeftHipRoll
+    id: 15
+    kp: 20.0
+    kd: 1.0
+  - name: LeftHipYaw
+    id: 16
+    kp: 20.0
+    kd: 1.0
+  - name: LeftKnee
+    id: 17
+    kp: 20.0
+    kd: 1.0
+  - name: LeftAnklePitch
+    id: 18
+    kp: 20.0
+    kd: 1.0
+  - name: LeftAnkleRoll
+    id: 19
+    kp: 20.0
+    kd: 1.0
+
+  # 右腿关节（示例映射，需要根据实际硬件调整）
+  - name: RightHipPitch
+    id: 20
+    kp: 20.0
+    kd: 1.0
+  - name: RightHipRoll
+    id: 21
+    kp: 20.0
+    kd: 1.0
+  - name: RightHipYaw
+    id: 22
+    kp: 20.0
+    kd: 1.0
+  - name: RightKnee
+    id: 23
+    kp: 20.0
+    kd: 1.0
+  - name: RightAnklePitch
+    id: 24
+    kp: 20.0
+    kd: 1.0
+  - name: RightAnkleRoll
+    id: 25
+    kp: 20.0
+    kd: 1.0
+
+  # 颈部关节（示例映射，需要根据实际硬件调整）
+  - name: NeckYaw
+    id: 26
+    kp: 20.0
+    kd: 1.0
+  - name: NeckRoll
+    id: 27
+    kp: 20.0
+    kd: 1.0
+  - name: NeckPitch
+    id: 28
+    kp: 20.0
+    kd: 1.0
+
+  # 注意：如果还有更多关节，继续添加...
+  # 总共最多支持 30 个电机（ID 0-29）
+

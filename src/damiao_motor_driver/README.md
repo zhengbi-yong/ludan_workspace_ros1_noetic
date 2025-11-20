@@ -59,6 +59,104 @@ rostopic pub /motor_cmd damiao_motor_driver/MotorCommand \
 
 注意：`motor_cmd_bridge_node` 和 `motor_driver_node` 不能同时运行，因为它们都需要独占串口。如果只需要通过话题控制电机，使用 `motor_cmd_bridge_node` 即可。
 
+## 通过 MoveIt 控制电机
+
+`motor_hw_interface` 提供了标准的 ros_control 硬件接口，可以与 MoveIt 集成，实现轨迹规划和执行。
+
+### 快速启动
+
+**方式一：使用集成启动文件（推荐）**
+```bash
+roslaunch damiao_motor_driver moveit_with_motor_driver.launch \
+  port:=/dev/ttyACM0 baud:=921600
+```
+
+这个启动文件会同时启动：
+- 硬件接口节点（`motor_hw_interface_node`）
+- MoveIt 规划组（`move_group`）
+- RViz 可视化界面
+
+**方式二：分步启动**
+
+1. **启动硬件接口和控制器：**
+```bash
+roslaunch damiao_motor_driver motor_hw_with_moveit.launch \
+  port:=/dev/ttyACM0 baud:=921600 \
+  joint_mapping:=$(find damiao_motor_driver)/config/joint_mapping_example.yaml
+```
+
+2. **启动 MoveIt：**
+```bash
+roslaunch ludan_moveit_config move_group.launch \
+  moveit_controller_manager:=ros_control
+```
+
+3. **启动 RViz（可选）：**
+```bash
+roslaunch ludan_moveit_config moveit_rviz.launch
+```
+
+### 关节名称映射配置
+
+MoveIt 使用关节名称（如 `LeftShoulderPitch`），而电机驱动使用数字 ID（0-29）。需要配置映射关系：
+
+1. **创建关节映射文件**（参考 `config/joint_mapping_example.yaml`）：
+```yaml
+joints:
+  - name: LeftShoulderPitch
+    id: 0
+    kp: 20.0
+    kd: 1.0
+  - name: LeftShoulderRoll
+    id: 1
+    kp: 20.0
+    kd: 1.0
+  # ... 更多关节映射
+```
+
+2. **在启动文件中加载映射：**
+```xml
+<rosparam file="$(find damiao_motor_driver)/config/your_joint_mapping.yaml" ns="motor_hw_interface" />
+```
+
+### MoveIt 控制器配置
+
+确保 MoveIt 配置中的 `ros_controllers.yaml` 包含 `controller_manager_ns` 参数：
+```yaml
+controller_manager_ns: /motor_hw_interface
+
+left_arm_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - LeftShoulderPitch
+    - LeftShoulderRoll
+    # ... 更多关节
+```
+
+### 使用 MoveIt 进行规划和控制
+
+1. **在 RViz 中规划轨迹：**
+   - 使用 Motion Planning 插件设置目标位置
+   - 点击 "Plan" 进行轨迹规划
+   - 点击 "Execute" 执行轨迹到真实硬件
+
+2. **通过命令行控制：**
+```bash
+# 查看可用的控制器
+rosservice call /motor_hw_interface/controller_manager/list_controllers
+
+# 查看关节状态
+rostopic echo /motor_hw_interface/joint_states
+```
+
+### 注意事项
+
+- **关节名称一致性**：确保 MoveIt 配置中的关节名称与硬件接口中的关节名称完全一致（包括大小写）
+- **电机 ID 映射**：根据实际硬件连接，正确配置关节名称到电机 ID 的映射关系
+- **控制器类型**：MoveIt 需要使用 `JointTrajectoryController`（提供 `follow_joint_trajectory` action），而不是 `JointGroupEffortController`
+- **命名空间**：确保 MoveIt 的 `controller_manager_ns` 指向 `/motor_hw_interface`
+- **串口独占**：`motor_hw_interface_node` 会独占串口，不能与其他驱动节点同时运行
+
 ## 单路电机通断测试
 若仅需验证单个电机收发是否正常，可使用内置节点持续向指定 ID 发送零力矩指令：
 ```bash
