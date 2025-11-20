@@ -6,6 +6,10 @@
     <arg name="loop_hz" default="500" />
     <arg name="controller_config" default="$(find damiao_motor_driver)/config/controllers.yaml" />
 
+    <!-- Load controller parameters into the hardware interface namespace
+         before the controller manager spawner starts. -->
+    <rosparam command="load" ns="$(arg ns)" file="$(arg controller_config)" />
+
     <group ns="$(arg ns)">
         <rosparam command="load" file="$(arg controller_config)" />
 
