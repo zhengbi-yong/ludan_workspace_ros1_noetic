@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>damiao_policy_bridge</name>
+  <version>1.0.0</version>
+  <description>Policy bridge for RL policy inference, data recording, and playback with Damiao motors</description>
+
+  <maintainer email="zhengbi.yong@outlook.com">Zhengbi Yong</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rosbag</depend>
+  <depend>damiao_motor_control_board_serial</depend>
+
+  <export>
+  </export>
+
+</package>
+

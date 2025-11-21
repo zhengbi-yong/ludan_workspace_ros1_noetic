@@ -1,0 +1,38 @@
+# Example configuration for policy_bridge node
+
+policy_bridge:
+  # Topics
+  motor_states_topic: "motor_states"
+  command_topic: "joint_group_effort_controller/command"
+  command_type: "effort"  # "effort", "twist", "cmd_vel"
+  action_topic: ""  # Optional: subscribe to external actions
+
+  # Joint configuration
+  joint_order: [0, 1, 2, 3, 4, 5]  # Motor IDs in order
+  observation_fields: ["pos", "vel", "tor"]  # Fields to observe
+
+  # Observation processing
+  observation_scale: 1.0  # Scale factor for observations
+  observation_clip: 0.0  # Clip observations (0.0 = no clipping)
+
+  # Action processing
+  action_scale: 1.0  # Scale factor for actions
+  action_clip: 0.0  # Clip actions (0.0 = no clipping)
+  action_filter_alpha: 0.25  # Exponential moving average coefficient (0-1)
+  action_damping: 0.0  # Damping coefficient (0-1)
+
+  # Policy configuration
+  policy_path: ""  # Path to policy file (.pt, .onnx)
+  policy_type: "auto"  # "auto", "torch", "onnx"
+
+  # Inference rate
+  inference_rate: 100.0  # Hz
+
+  # Playback configuration
+  playback_source: ""  # Path to playback file (.bag, .csv)
+  playback_topic: ""  # Topic name in bag (defaults to command_topic)
+
+  # Recording configuration
+  record_bag_path: ""  # Path to output rosbag file
+  record_csv_path: ""  # Path to output CSV file
+

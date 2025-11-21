@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+"""Policy bridge node for RL policy inference, data recording, and playback."""
 
 import csv
-import importlib.util
 import math
 from typing import List, Optional, Sequence, Tuple
 
@@ -12,8 +12,13 @@ from damiao_motor_control_board_serial.msg import MotorStates
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 
+from damiao_policy_bridge.lib.action_filter import ActionFilter
+from damiao_policy_bridge.lib.data_recorder import DataRecorder
+from damiao_policy_bridge.lib.policy_loader import PolicyLoader
+
 
 def _as_array(value, length: int) -> np.ndarray:
+    """Convert value to numpy array of specified length."""
     if isinstance(value, (list, tuple)):
         arr = np.array(value, dtype=np.float32)
     else:
@@ -24,115 +29,89 @@ def _as_array(value, length: int) -> np.ndarray:
 
 
 def _clip_if_needed(array: np.ndarray, limit: Optional[float]) -> np.ndarray:
+    """Clip array if limit is specified."""
     if limit is None or limit <= 0.0:
         return array
     return np.clip(array, -limit, limit)
 
 
 class PolicyBridge:
+    """Main policy bridge class."""
+
     def __init__(self):
+        """Initialize policy bridge."""
+        # Load parameters
         self.motor_states_topic = rospy.get_param("~motor_states_topic", "motor_states")
-        self.command_topic = rospy.get_param("~command_topic", "joint_group_effort_controller/command")
+        self.command_topic = rospy.get_param(
+            "~command_topic", "joint_group_effort_controller/command"
+        )
         self.command_type = rospy.get_param("~command_type", "effort").lower()
         self.joint_order: Sequence[int] = rospy.get_param("~joint_order", [])
-        self.observation_fields: Sequence[str] = rospy.get_param("~observation_fields", ["pos", "vel", "tor"])
+        self.observation_fields: Sequence[str] = rospy.get_param(
+            "~observation_fields", ["pos", "vel", "tor"]
+        )
         self.observation_scale_param = rospy.get_param("~observation_scale", 1.0)
         self.observation_clip = rospy.get_param("~observation_clip", 0.0)
         self.action_scale_param = rospy.get_param("~action_scale", 1.0)
         self.action_clip = rospy.get_param("~action_clip", 0.0)
         self.inference_rate = float(rospy.get_param("~inference_rate", 100.0))
-        self.action_filter_alpha = float(rospy.get_param("~action_filter_alpha", 0.25))
-        self.action_damping = float(rospy.get_param("~action_damping", 0.0))
-        self.policy_path = rospy.get_param("~policy_path", "")
-        self.policy_type = rospy.get_param("~policy_type", "auto").lower()
+        action_filter_alpha = float(rospy.get_param("~action_filter_alpha", 0.25))
+        action_damping = float(rospy.get_param("~action_damping", 0.0))
+        policy_path = rospy.get_param("~policy_path", "")
+        policy_type = rospy.get_param("~policy_type", "auto").lower()
         self.action_topic = rospy.get_param("~action_topic", "")
         self.playback_source = rospy.get_param("~playback_source", "")
         self.playback_topic = rospy.get_param("~playback_topic", self.command_topic)
-        self.record_bag_path = rospy.get_param("~record_bag_path", "")
-        self.record_csv_path = rospy.get_param("~record_csv_path", "")
+        record_bag_path = rospy.get_param("~record_bag_path", "")
+        record_csv_path = rospy.get_param("~record_csv_path", "")
 
+        # Initialize components
+        self.policy_loader = PolicyLoader(policy_path, policy_type)
+        self.data_recorder = DataRecorder(
+            record_bag_path=record_bag_path,
+            record_csv_path=record_csv_path,
+            motor_states_topic=self.motor_states_topic,
+            joint_order=self.joint_order,
+            observation_fields=self.observation_fields,
+        )
+        self.action_filter = ActionFilter(
+            filter_alpha=action_filter_alpha, damping=action_damping
+        )
+
+        # State
         self.latest_states: Optional[MotorStates] = None
         self.latest_action: Optional[np.ndarray] = None
-        self.filtered_action: Optional[np.ndarray] = None
-        self.policy_impl = None
         self.playback_actions: List[Tuple[float, List[float]]] = []
         self.playback_index = 0
         self.playback_start_time = None
 
-        self.command_pub = rospy.Publisher(self.command_topic, Float64MultiArray, queue_size=1)
+        # Publishers
+        self.command_pub = rospy.Publisher(
+            self.command_topic, Float64MultiArray, queue_size=1
+        )
         self.twist_pub = None
-        if self.command_type in {"twist", "cmd_vel"} or self.command_topic.endswith("cmd_vel"):
+        if self.command_type in {"twist", "cmd_vel"} or self.command_topic.endswith(
+            "cmd_vel"
+        ):
             self.twist_pub = rospy.Publisher(self.command_topic, Twist, queue_size=1)
 
-        self.record_bag = None
-        if self.record_bag_path:
-            self.record_bag = rosbag.Bag(self.record_bag_path, mode="w")
-        self.record_csv = None
-        if self.record_csv_path:
-            self.record_csv = open(self.record_csv_path, "w", newline="")
-            self.csv_writer = csv.writer(self.record_csv)
-            header = ["stamp"]
-            for joint in self.joint_order or []:
-                for field in self.observation_fields:
-                    header.append(f"{joint}_{field}")
-            self.csv_writer.writerow(header)
-
-        rospy.Subscriber(self.motor_states_topic, MotorStates, self.motor_states_cb, queue_size=1)
+        # Subscribers
+        rospy.Subscriber(
+            self.motor_states_topic, MotorStates, self.motor_states_cb, queue_size=1
+        )
         if self.action_topic:
-            rospy.Subscriber(self.action_topic, Float64MultiArray, self.external_action_cb, queue_size=1)
+            rospy.Subscriber(
+                self.action_topic,
+                Float64MultiArray,
+                self.external_action_cb,
+                queue_size=1,
+            )
 
-        rospy.on_shutdown(self._cleanup_recorders)
-        self._load_policy_if_needed()
+        # Load playback data
         self._load_playback()
 
-    def _cleanup_recorders(self):
-        if self.record_bag is not None:
-            self.record_bag.close()
-        if self.record_csv is not None:
-            self.record_csv.close()
-
-    def _load_policy_if_needed(self):
-        if not self.policy_path:
-            rospy.loginfo("Policy path not provided, expecting actions from topic or playback.")
-            return
-
-        if self.policy_type == "auto":
-            if self.policy_path.endswith(".onnx"):
-                self.policy_type = "onnx"
-            else:
-                self.policy_type = "torch"
-
-        if self.policy_type == "torch":
-            torch_spec = importlib.util.find_spec("torch")
-            if torch_spec is None:
-                rospy.logerr("PyTorch is not available but policy_type is set to torch.")
-                return
-            import torch
-
-            try:
-                self.policy_impl = torch.jit.load(self.policy_path)
-                self.policy_impl.eval()
-                rospy.loginfo("Loaded TorchScript policy from %s", self.policy_path)
-            except Exception as exc:  # noqa: BLE001
-                rospy.logerr("Failed to load Torch policy: %s", exc)
-                self.policy_impl = None
-        elif self.policy_type == "onnx":
-            ort_spec = importlib.util.find_spec("onnxruntime")
-            if ort_spec is None:
-                rospy.logerr("onnxruntime is not available but policy_type is set to onnx.")
-                return
-            import onnxruntime as ort
-
-            try:
-                self.policy_impl = ort.InferenceSession(self.policy_path, providers=["CPUExecutionProvider"])
-                rospy.loginfo("Loaded ONNX policy from %s", self.policy_path)
-            except Exception as exc:  # noqa: BLE001
-                rospy.logerr("Failed to load ONNX policy: %s", exc)
-                self.policy_impl = None
-        else:
-            rospy.logerr("Unsupported policy_type: %s", self.policy_type)
-
     def _load_playback(self):
+        """Load playback data from bag or CSV."""
         if not self.playback_source:
             return
         if self.playback_source.endswith(".bag"):
@@ -143,6 +122,7 @@ class PolicyBridge:
             rospy.logwarn("Unsupported playback source: %s", self.playback_source)
 
     def _load_bag_playback(self):
+        """Load playback actions from rosbag."""
         try:
             with rosbag.Bag(self.playback_source, "r") as bag:
                 for topic, msg, t in bag.read_messages(topics=[self.playback_topic]):
@@ -154,6 +134,7 @@ class PolicyBridge:
             rospy.loginfo("Loaded %d actions from rosbag", len(self.playback_actions))
 
     def _load_csv_playback(self):
+        """Load playback actions from CSV."""
         try:
             with open(self.playback_source, "r") as handle:
                 reader = csv.reader(handle)
@@ -172,31 +153,20 @@ class PolicyBridge:
             rospy.loginfo("Loaded %d actions from CSV", len(self.playback_actions))
 
     def motor_states_cb(self, msg: MotorStates):
+        """Motor states callback."""
         self.latest_states = msg
-        self._record_feedback(msg)
+        self.data_recorder.record(msg)
 
     def external_action_cb(self, msg: Float64MultiArray):
+        """External action callback."""
         self.latest_action = np.array(msg.data, dtype=np.float32)
 
-    def _record_feedback(self, msg: MotorStates):
-        if self.record_bag is not None:
-            self.record_bag.write(self.motor_states_topic, msg, t=msg.header.stamp)
-        if self.record_csv is not None and self.joint_order:
-            row = [msg.header.stamp.to_sec() if msg.header.stamp else rospy.Time.now().to_sec()]
-            motors = self._index_motor_states(msg)
-            for joint in self.joint_order:
-                state = motors.get(joint)
-                if state is None:
-                    row.extend([math.nan] * len(self.observation_fields))
-                    continue
-                for field in self.observation_fields:
-                    row.append(getattr(state, field, math.nan))
-            self.csv_writer.writerow(row)
-
     def _index_motor_states(self, msg: MotorStates):
+        """Index motor states by ID."""
         return {state.id: state for state in msg.motors}
 
     def _build_observation(self) -> Optional[np.ndarray]:
+        """Build observation array from motor states."""
         if self.latest_states is None:
             return None
         motors = self._index_motor_states(self.latest_states)
@@ -217,29 +187,20 @@ class PolicyBridge:
         return obs
 
     def _inference(self, obs: np.ndarray) -> Optional[np.ndarray]:
+        """Run policy inference or get playback action."""
         if self.playback_actions:
             return self._next_playback_action()
-        if self.policy_impl is None:
-            return self.latest_action
-        if self.policy_type == "torch":
-            import torch
-
-            with torch.no_grad():
-                tensor = torch.from_numpy(obs).unsqueeze(0)
-                output = self.policy_impl(tensor).cpu().numpy().squeeze()
-        elif self.policy_type == "onnx":
-            input_name = self.policy_impl.get_inputs()[0].name
-            outputs = self.policy_impl.run(None, {input_name: obs[np.newaxis, :]})
-            output = outputs[0].squeeze()
-        else:
-            return None
-        action = np.array(output, dtype=np.float32)
-        scale = _as_array(self.action_scale_param, len(action))
-        action = action * scale
-        action = _clip_if_needed(action, float(self.action_clip))
-        return action
+        if self.policy_loader.is_loaded():
+            action = self.policy_loader.infer(obs)
+            if action is not None:
+                scale = _as_array(self.action_scale_param, len(action))
+                action = action * scale
+                action = _clip_if_needed(action, float(self.action_clip))
+            return action
+        return self.latest_action
 
     def _next_playback_action(self) -> Optional[np.ndarray]:
+        """Get next action from playback."""
         if self.playback_index >= len(self.playback_actions):
             return None
         if self.playback_start_time is None:
@@ -252,18 +213,8 @@ class PolicyBridge:
         self.latest_action = np.array(values, dtype=np.float32)
         return self.latest_action
 
-    def _filter_action(self, action: np.ndarray) -> np.ndarray:
-        if self.filtered_action is None:
-            self.filtered_action = action.copy()
-            return self.filtered_action
-        if self.action_damping > 0.0 and self.latest_action is not None:
-            delta = action - self.filtered_action
-            action = self.filtered_action + (1.0 - self.action_damping) * delta
-        alpha = max(0.0, min(1.0, self.action_filter_alpha))
-        self.filtered_action = self.filtered_action + alpha * (action - self.filtered_action)
-        return self.filtered_action
-
     def _publish_action(self, action: np.ndarray):
+        """Publish action to command topic."""
         if self.twist_pub is not None:
             twist = Twist()
             values = action.tolist()
@@ -281,6 +232,7 @@ class PolicyBridge:
         self.command_pub.publish(msg)
 
     def spin(self):
+        """Main loop."""
         rate = rospy.Rate(self.inference_rate)
         while not rospy.is_shutdown():
             obs = self._build_observation()
@@ -292,12 +244,13 @@ class PolicyBridge:
                 rate.sleep()
                 continue
             self.latest_action = action
-            action = self._filter_action(action)
-            self._publish_action(action)
+            filtered_action = self.action_filter.filter(action, self.latest_action)
+            self._publish_action(filtered_action)
             rate.sleep()
 
 
 def main():
+    """Main entry point."""
     rospy.init_node("policy_bridge")
     node = PolicyBridge()
     node.spin()
@@ -305,3 +258,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
