@@ -1,0 +1,62 @@
+# Unified motor driver configuration file
+# This file contains all configuration parameters for the motor driver system
+
+motor_driver_node:
+  # Serial port configuration
+  port: "/dev/ttyACM0"
+  baud: 921600
+  
+  # Publishing configuration
+  publish_rate: 100.0  # Hz
+  diagnostic_rate: 1.0  # Hz
+  
+  # TF prefix (optional)
+  tf_prefix: ""
+  
+  # Motor configuration
+  motors:
+    # Example motor configuration
+    # Each motor can have:
+    #   - id: Motor ID (0-29)
+    #   - type: Motor type (e.g., "MIT_4340")
+    #   - state: Initial state (0 = disabled, 1 = enabled)
+    - id: 0
+      type: "MIT_4340"
+      state: 0
+    - id: 1
+      type: "MIT_4340"
+      state: 0
+    # Add more motors as needed...
+
+motor_hw_interface:
+  # Serial port configuration
+  port: "/dev/ttyACM0"
+  baud: 921600
+  
+  # Control loop rate
+  loop_hz: 500
+  
+  # TF prefix (optional)
+  tf_prefix: ""
+  
+  # Default gains
+  default_kp: 20.0
+  default_kd: 1.0
+  
+  # Limits (optional, defaults to protocol limits)
+  kp_limit: 500.0
+  kd_limit: 5.0
+  torque_limit: 10.0
+  velocity_limit: 30.0
+  position_limit: 12.5
+  
+  # Joint configuration
+  # This should match your MoveIt configuration
+  joints:
+    # Example joint mapping
+    # - name: "joint_name"
+    #   id: 0
+    #   kp: 20.0  # Optional
+    #   kd: 1.0   # Optional
+    # Add your joint mappings here...
+

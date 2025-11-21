@@ -1,29 +1,31 @@
 #include <ros/ros.h>
-#include <damiao_motor_driver/motor_driver.h>
 #include <damiao_motor_driver/MotorCommand.h>
+#include <damiao_motor_driver/SendCommand.h>
 
-std::shared_ptr<MotorDriver> g_driver;
+ros::ServiceClient g_send_command_client;
 
 void cmdCallback(const damiao_motor_driver::MotorCommand::ConstPtr& msg)
 {
-    if (!g_driver || !g_driver->is_running()) {
-        ROS_WARN_THROTTLE(1.0, "Motor driver not running, ignore cmd");
+    if (!g_send_command_client.exists()) {
+        ROS_WARN_THROTTLE(1.0, "SendCommand service not available, ignore cmd");
         return;
     }
 
-    MotorDriver::CommandStatus status =
-        g_driver->send_cmd(msg->id, msg->p, msg->v, msg->kp, msg->kd, msg->torque);
+    damiao_motor_driver::SendCommand srv;
+    srv.request.id = msg->id;
+    srv.request.p = msg->p;
+    srv.request.v = msg->v;
+    srv.request.kp = msg->kp;
+    srv.request.kd = msg->kd;
+    srv.request.torque = msg->torque;
 
-    switch (status) {
-    case MotorDriver::CommandStatus::Ok:
-        // 正常就不打日志，避免刷屏
-        break;
-    case MotorDriver::CommandStatus::Limited:
-        ROS_WARN_THROTTLE(1.0, "Cmd for motor %d limited to protocol bounds", msg->id);
-        break;
-    case MotorDriver::CommandStatus::SerialError:
-        ROS_WARN_THROTTLE(1.0, "Serial error while sending cmd to motor %d", msg->id);
-        break;
+    if (!g_send_command_client.call(srv)) {
+        ROS_WARN_THROTTLE(1.0, "Failed to call SendCommand service for motor %d", msg->id);
+        return;
+    }
+
+    if (!srv.response.success) {
+        ROS_WARN_THROTTLE(1.0, "SendCommand failed for motor %d: %s", msg->id, srv.response.message.c_str());
     }
 }
 
@@ -31,17 +33,24 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "damiao_motor_cmd_bridge");
     ros::NodeHandle nh;
+    ros::NodeHandle private_nh("~");
 
-    // 创建并启动 MotorDriver：打开串口 + 启动反馈线程
-    g_driver = std::make_shared<MotorDriver>(nh);
-    g_driver->start();
+    // Wait for motor_driver_node service
+    std::string service_name = private_nh.param<std::string>("service_name", "motor_driver_node/send_command");
+    ROS_INFO("Waiting for service: %s", service_name.c_str());
+    
+    if (!ros::service::waitForService(service_name, ros::Duration(5.0))) {
+        ROS_ERROR("Service %s not available. Make sure motor_driver_node is running.", service_name.c_str());
+        return 1;
+    }
 
-    // 订阅控制话题 /motor_cmd
+    g_send_command_client = nh.serviceClient<damiao_motor_driver::SendCommand>(service_name);
+
+    // Subscribe to control topic /motor_cmd
     ros::Subscriber sub = nh.subscribe("motor_cmd", 10, cmdCallback);
 
+    ROS_INFO("Motor command bridge started, listening to /motor_cmd topic");
     ros::spin();
 
-    // 退出时安全停
-    g_driver->stop();
     return 0;
 }

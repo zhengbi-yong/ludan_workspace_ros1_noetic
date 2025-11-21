@@ -2,7 +2,22 @@
 
 本节说明在代码已成功编译后，如何在实际硬件上测试达妙电机驱动。默认假设已完成 `source devel/setup.bash` 并能访问串口设备。
 
+## 架构概述
+
+`damiao_motor_driver` 采用分层架构设计：
+
+- **核心层** (`damiao_motor_core`): 纯C++库，无ROS依赖，提供底层通信和驱动功能
+- **ROS包装层** (`damiao_motor_driver`): ROS接口封装，提供话题、服务、ros_control集成
+- **应用层** (`damiao_policy_bridge`): 高级应用功能（RL策略推理、数据记录等）
+
+### 主要节点
+
+- **`motor_driver_node`**: 核心驱动节点，独占串口，提供ROS服务和话题接口
+- **`motor_hw_interface_node`**: ros_control硬件接口节点，用于MoveIt集成
+- **`motor_cmd_bridge_node`**: 话题桥接节点，将话题命令转发到服务接口
+
 ## 启动驱动节点
+
 1. 确认 USB/串口已经赋予读写权限（例如 `sudo chmod a+rw /dev/ttyACM0`）。
 2. 根据实际串口名和波特率配置参数后启动驱动：
    ```bash
@@ -12,11 +27,14 @@
    - `baud`：串口波特率，默认 `921600`。
    - 如有多套设备，可通过 `ns` 与 `tf_prefix` 参数在不同命名空间下重复启动。
 
-驱动启动后会自动通过 `controller_manager` 加载 `joint_state_controller` 与 `joint_group_effort_controller`。因此除了反馈话题，还会额外暴露以下接口：
+驱动启动后会暴露以下接口：
 
-- `motor_states` (`damiao_motor_control_board_serial/MotorStates`)：包含 30 路电机的 `pos/vel/tor` 反馈。
-- `status` (`diagnostic_msgs/DiagnosticArray`)：串口连接状态、丢包率、重连次数等健康度信息。
-- `joint_group_effort_controller/command` (`std_msgs/Float64MultiArray`)：力矩控制指令，数组顺序与 `controllers.yaml` 中的 `joints` 列表一致，可通过 `rostopic pub` 或自定义节点写入。
+- **话题**:
+  - `motor_states` (`damiao_motor_control_board_serial/MotorStates`)：包含 30 路电机的 `pos/vel/tor` 反馈。
+  - `status` (`diagnostic_msgs/DiagnosticArray`)：串口连接状态、丢包率、重连次数等健康度信息。
+- **服务**:
+  - `send_command` (`damiao_motor_driver/SendCommand`)：发送单个电机命令
+  - `send_commands` (`damiao_motor_driver/SendCommands`)：批量发送电机命令
 
 可通过以下命令观测：
 ```bash
@@ -31,12 +49,20 @@ rostopic pub /motor_driver/joint_group_effort_controller/command std_msgs/Float6
 ```
 确保消息长度与启用的关节数量一致即可驱动对应电机。
 
-## 通过 rostopic pub 控制电机
-`motor_cmd_bridge_node` 提供了通过 ROS 话题直接控制电机的功能。启动节点后，可以通过 `rostopic pub` 命令或自定义节点向 `/motor_cmd` 话题发布命令来控制电机。
+## 通过话题控制电机
 
-**启动节点：**
+`motor_cmd_bridge_node` 提供了通过 ROS 话题控制电机的功能。它作为轻量级桥接节点，将话题命令转发到 `motor_driver_node` 的服务接口。
+
+**启动方式：**
+
+1. **首先启动核心驱动节点**（必须）：
 ```bash
-roslaunch damiao_motor_driver motor_cmd_bridge.launch port:=/dev/ttyACM0 baud:=921600
+roslaunch damiao_motor_driver motor_driver.launch port:=/dev/ttyACM0 baud:=921600
+```
+
+2. **然后启动话题桥接节点**：
+```bash
+roslaunch damiao_motor_driver motor_cmd_bridge.launch
 ```
 
 **通过命令行控制电机：**
@@ -54,10 +80,19 @@ rostopic pub /motor_cmd damiao_motor_driver/MotorCommand \
 - `torque`: 力矩（Nm）
 - `-r 200`: 以 200 Hz 频率持续发布
 
-**通过自定义节点控制：**
-其他 ROS 节点可以订阅 `/motor_cmd` 话题并发布 `damiao_motor_driver/MotorCommand` 消息来控制电机。
+**通过服务接口控制（推荐）：**
 
-注意：`motor_cmd_bridge_node` 和 `motor_driver_node` 不能同时运行，因为它们都需要独占串口。如果只需要通过话题控制电机，使用 `motor_cmd_bridge_node` 即可。
+也可以直接调用服务接口，无需桥接节点：
+```bash
+rosservice call /motor_driver_node/send_command \
+  "{id: 0, p: 0.3, v: 0.0, kp: 20.0, kd: 1.0, torque: 0.0}"
+```
+
+**批量命令：**
+```bash
+rosservice call /motor_driver_node/send_commands \
+  "{commands: [{id: 0, p: 0.3, v: 0.0, kp: 20.0, kd: 1.0, torque: 0.0}, ...]}"
+```
 
 ## 通过 MoveIt 控制电机
 
@@ -157,19 +192,31 @@ rostopic echo /motor_hw_interface/joint_states
 - **命名空间**：确保 MoveIt 的 `controller_manager_ns` 指向 `/motor_hw_interface`
 - **串口独占**：`motor_hw_interface_node` 会独占串口，不能与其他驱动节点同时运行
 
-## 单路电机通断测试
-若仅需验证单个电机收发是否正常，可使用内置节点持续向指定 ID 发送零力矩指令：
+## 测试节点
+
+### 单路电机通断测试
+若仅需验证单个电机收发是否正常，可使用测试节点持续向指定 ID 发送零力矩指令：
+
 ```bash
+# 首先启动motor_driver_node
+roslaunch damiao_motor_driver motor_driver.launch port:=/dev/ttyACM0 baud:=921600
+
+# 然后运行测试节点
 rosrun damiao_motor_driver send_single_motor_node _id:=5
 ```
-- 将 `_id` 换成目标电机的协议 ID。节点启动后会自动打开串口并开始发送命令，按 `Ctrl+C` 可退出；退出时会下发安全帧使电机进入安全模式。
+- 将 `_id` 换成目标电机的协议 ID。节点通过ROS服务接口发送命令，按 `Ctrl+C` 可退出。
 
-## 全链路闭环测试（sin 轨迹）
+### 全链路闭环测试（sin 轨迹）
 要快速验证 30 路电机的控制回路，可运行轨迹控制节点，让所有 ID 按正弦轨迹运动：
+
 ```bash
+# 首先启动motor_driver_node
+roslaunch damiao_motor_driver motor_driver.launch port:=/dev/ttyACM0 baud:=921600
+
+# 然后运行测试节点
 rosrun damiao_motor_driver trajectory_controller_node
 ```
-节点以 500 Hz 发布指令，`pos` 约为 ±0.5rad、`vel` 峰值约 1.57rad/s。运行过程中可结合 `rqt_plot` 观察 `motor_states` 中的 `pos`、`vel` 是否跟随。
+节点以 500 Hz 通过ROS服务接口发布指令，`pos` 约为 ±0.5rad、`vel` 峰值约 1.57rad/s。运行过程中可结合 `rqt_plot` 观察 `motor_states` 中的 `pos`、`vel` 是否跟随。
 
 ## 与 ros_control 集成测试
 该包提供了 `hardware_interface::RobotHW` 插件（`motor_hw_interface_plugin.xml` 中的 `damiao_motor_driver/MotorHWInterface`），可在自定义的 `controller_manager` 节点中加载。
@@ -186,19 +233,23 @@ rosrun damiao_motor_driver trajectory_controller_node
 按照上述流程，即可在硬件上验证驱动的通讯、反馈和控制功能是否正常。
 
 ## 策略桥接与离线回放
-`scripts/policy_bridge.py` 提供了一个基于 Python/rospy 的轻量级策略桥接节点，便于把上层学习策略或离线控制轨迹映射到电机控制器：
 
+策略桥接功能已独立为 `damiao_policy_bridge` 包，提供基于 Python/rospy 的策略桥接节点，便于把上层学习策略或离线控制轨迹映射到电机控制器。
+
+**启动策略桥接节点：**
+```bash
+rosrun damiao_policy_bridge policy_bridge_node \
+  _joint_order:=[0,1,2,3] _policy_path:=/tmp/policy.onnx _command_topic:=/joint_group_effort_controller/command \
+  _action_clip:=2.5 _action_filter_alpha:=0.2 _record_bag_path:=/tmp/motor_states.bag
+```
+
+**功能特性：**
 - 订阅 `motor_states` 并按照 `~joint_order` 与 `~observation_fields` 构造观测向量，可选归一化/裁剪（`~observation_scale`、`~observation_clip`）。
 - 从 TorchScript/ONNX 权重（`~policy_path`、`~policy_type`）推理，或订阅外部动作话题（`~action_topic`）。动作支持缩放/限幅（`~action_scale`、`~action_clip`）以及低通/阻尼滤波（`~action_filter_alpha`、`~action_damping`）。
 - 输出可映射到 `cmd_vel`（Twist）或 `joint_group_effort_controller/command` 等控制器话题。
 - 支持 rosbag/CSV 回放（`~playback_source`、`~playback_topic`），并可将反馈记录到 bag/CSV（`~record_bag_path`、`~record_csv_path`）以评估延迟与安全钳位效果。
 
-例如：
-```bash
-rosrun damiao_motor_driver policy_bridge.py \
-  _joint_order:=[0,1,2,3] _policy_path:=/tmp/policy.onnx _command_topic:=/joint_group_effort_controller/command \
-  _action_clip:=2.5 _action_filter_alpha:=0.2 _record_bag_path:=/tmp/motor_states.bag
-```
+详细配置请参考 `damiao_policy_bridge/config/policy_bridge_example.yaml`。
 
 ## IsaacLab 部署流程
 以下步骤可将训练好的策略通过 `policy_bridge` 部署到真实电机：

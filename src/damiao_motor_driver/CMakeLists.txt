@@ -111,24 +111,33 @@ add_dependencies(motor_driver_node
     ${catkin_EXPORTED_TARGETS}
 )
 
-# 单独控制任意电机
-add_executable(send_single_motor_node src/send_single_motor_node.cpp)
-target_link_libraries(send_single_motor_node
-    motor_driver
-    ${catkin_LIBRARIES}
-)
-
-# 轨迹跟踪控制器
-add_executable(trajectory_controller_node src/trajectory_controller_node.cpp)
-target_link_libraries(trajectory_controller_node
-    motor_driver
-    ${catkin_LIBRARIES}
-)
-# 话题控制桥接节点：订阅 /motor_cmd -> 调用 MotorDriver::send_cmd
+# 话题控制桥接节点：订阅 /motor_cmd -> 调用 ROS 服务
 add_executable(motor_cmd_bridge_node src/motor_cmd_bridge.cpp)
 target_link_libraries(motor_cmd_bridge_node
-    motor_driver
     ${catkin_LIBRARIES}
+)
+add_dependencies(motor_cmd_bridge_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+
+# 测试节点（使用ROS服务接口）
+add_executable(send_single_motor_node test_nodes/send_single_motor_node.cpp)
+target_link_libraries(send_single_motor_node
+    ${catkin_LIBRARIES}
+)
+add_dependencies(send_single_motor_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
+
+add_executable(trajectory_controller_node test_nodes/trajectory_controller_node.cpp)
+target_link_libraries(trajectory_controller_node
+    ${catkin_LIBRARIES}
+)
+add_dependencies(trajectory_controller_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
 )
 add_dependencies(motor_cmd_bridge_node
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -151,14 +160,6 @@ add_dependencies(motor_driver_node
     ${catkin_EXPORTED_TARGETS}
 )
 
-add_dependencies(send_single_motor_node
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-)
-add_dependencies(trajectory_controller_node
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-)
 
 if (CATKIN_ENABLE_TESTING)
     catkin_add_gtest(motor_protocol_test test/protocol_test.cpp)
