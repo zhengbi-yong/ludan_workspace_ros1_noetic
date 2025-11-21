@@ -10,7 +10,7 @@ joint_state_controller:
 
 # 左臂控制器
 left_arm_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - LeftShoulderPitch
     - LeftShoulderRoll
@@ -30,7 +30,7 @@ left_arm_controller:
 
 # 右臂控制器
 right_arm_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - RightShoulderPitch
     - RightShoulderRoll
@@ -50,7 +50,7 @@ right_arm_controller:
 
 # 左腿控制器
 left_leg_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - LeftHipPitch
     - LeftHipRoll
@@ -68,7 +68,7 @@ left_leg_controller:
 
 # 右腿控制器
 right_leg_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - RightHipPitch
     - RightHipRoll
@@ -86,7 +86,7 @@ right_leg_controller:
 
 # 颈部控制器
 neck_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - NeckYaw
     - NeckRoll
@@ -98,7 +98,7 @@ neck_controller:
 
 # 上半身控制器（包含双臂和颈部）
 upper_body_controller:
-  type: effort_controllers/JointTrajectoryController
+  type: position_controllers/JointTrajectoryController
   joints:
     - LeftShoulderPitch
     - LeftShoulderRoll

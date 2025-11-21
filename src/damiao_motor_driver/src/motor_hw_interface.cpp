@@ -13,6 +13,8 @@ MotorHWInterface::MotorHWInterface()
 MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport)
     : nh_(nh), driver_(nh, std::move(transport))
 {
+    zero_srv_ = nh_.advertiseService("go_zero", &MotorHWInterface::goZero, this);
+
     limits_.kp = MITProtocol::KP_MAX;
     limits_.kd = MITProtocol::KD_MAX;
     limits_.torque = MITProtocol::T_MAX;
@@ -137,9 +139,14 @@ void MotorHWInterface::write()
         const double kd_min = static_cast<double>(MITProtocol::KD_MIN);
         const double kd_max = std::min(limits_copy.kd, static_cast<double>(MITProtocol::KD_MAX));
 
+        // MIT 电机需要同时发送位置、速度、kp、kd 和 torque
+        // position_controllers/JointTrajectoryController 通过 PositionJointInterface 发送位置命令
+        // 直接使用控制器提供的命令值
         double pos_cmd = clamp_value(cmd_pos_[i], pos_min, pos_max, limited);
         double vel_cmd = clamp_value(cmd_vel_[i], vel_min, vel_max, limited);
-        double eff_cmd = clamp_value(cmd_eff_[i], tor_min, tor_max, limited);
+        // 对于 position 控制器，effort 命令通常为 0（由电机内部 PID 控制）
+        // 如果需要额外的力矩补偿，可以使用 cmd_eff_，否则设为 0
+        double eff_cmd = 0.0;  // position 控制模式下，effort 设为 0
 
         const std::string& joint_name = joints_[i].name;
         double kp_base = joints_[i].kp > 0.0 ? joints_[i].kp : default_kp_;
@@ -264,6 +271,14 @@ void MotorHWInterface::stopDriver()
 {
     driver_.stop();
 }
+bool MotorHWInterface::goZero(std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res)
+{
+    driver_.go_to_zero();
+    res.success = true;
+    res.message = "All motors commanded to go to zero.";
+    return true;
+}
+
 }
 
 PLUGINLIB_EXPORT_CLASS(damiao_motor_driver::MotorHWInterface, hardware_interface::RobotHW)

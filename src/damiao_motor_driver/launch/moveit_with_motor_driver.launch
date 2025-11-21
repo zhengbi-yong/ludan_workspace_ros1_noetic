@@ -27,8 +27,77 @@
         <arg name="allow_trajectory_execution" value="true" />
     </include>
 
-    <!-- 启动 RViz -->
-    <include if="$(arg use_rviz)" file="$(find ludan_moveit_config)/launch/moveit_rviz.launch" />
+    <!-- <include if="$(arg use_rviz)" file="$(find ludan_moveit_config)/launch/moveit_rviz.launch" /> -->
+
+    <!-- 所有 controllers 都在这个 namespace 下 -->
+    <arg name="ns" default="motor_hw_interface/hardware" />
+
+    <!-- 自动加载控制器配置（你已有的 controllers.yaml） -->
+    <rosparam command="load"
+              file="$(find damiao_motor_driver)/cfg/moveit_controllers.yaml"
+              ns="$(arg ns)" />
+
+    <!-- 等待 hardware_interface 初始化 -->
+    <node pkg="roslaunch"
+          type="sleep.py"
+          name="controller_delay"
+          args="3" output="screen"/>
+
+    <!-- 自动启动 joint_state_controller -->
+    <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_joint_state"
+          ns="$(arg ns)"
+          output="screen"
+          args="joint_state_controller" />
+
+    <!-- 自动启动左臂 -->
+    <!-- <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_left_arm"
+          ns="$(arg ns)"
+          output="screen"
+          args="left_arm_controller" /> -->
+
+    <!-- 自动启动右臂 -->
+    <!-- <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_right_arm"
+          ns="$(arg ns)"
+          output="screen"
+          args="right_arm_controller" /> -->
+
+    <!-- 自动启动左腿 -->
+    <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_left_leg"
+          ns="$(arg ns)"
+          output="screen"
+          args="left_leg_controller" />
+
+    <!-- 自动启动右腿 -->
+    <!-- <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_right_leg"
+          ns="$(arg ns)"
+          output="screen"
+          args="right_leg_controller" /> -->
+
+    <!-- 自动启动颈部 -->
+    <!-- <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_neck"
+          ns="$(arg ns)"
+          output="screen"
+          args="neck_controller" /> -->
+
+    <!-- 自动启动上半身 -->
+    <!-- <node pkg="controller_manager"
+          type="spawner"
+          name="spawner_upper_body"
+          ns="$(arg ns)"
+          output="screen"
+          args="upper_body_controller" /> -->
 
 </launch>
 

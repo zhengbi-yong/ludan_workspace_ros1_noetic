@@ -37,6 +37,7 @@ public:
     CommandStatus send_cmd(int id, float p, float v, float kp, float kd, float torque);
     bool is_running() const { return running_.load(); }
     void send_safe_mode_frame();
+    void go_to_zero();
     std::vector<damiao_motor_control_board_serial::MotorState> get_states() const;
     ros::Time get_last_feedback_time() const { return last_feedback_time_; }
 

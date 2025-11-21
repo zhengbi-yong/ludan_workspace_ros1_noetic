@@ -13,6 +13,8 @@
 #include <ros/ros.h>
 #include <string>
 #include <vector>
+#include <std_srvs/Trigger.h>
+
 namespace damiao_motor_driver {
 class MotorHWInterface : public hardware_interface::RobotHW
 {
@@ -25,8 +27,11 @@ public:
     ros::Time getLastCommandUpdateTime() const;
     void sendSafeMode();
     void stopDriver();
+    bool goZero(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&);
 
 private:
+    ros::ServiceServer zero_srv_;   
+
     struct JointConfig
     {
         std::string name;

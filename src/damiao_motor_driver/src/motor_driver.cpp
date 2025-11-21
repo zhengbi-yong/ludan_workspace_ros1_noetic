@@ -416,3 +416,10 @@ void MotorDriver::publish_status()
     array.status.push_back(status);
     status_pub_.publish(array);
 }
+
+void MotorDriver::go_to_zero()
+{
+    for (int id = 0; id < 32; id++) {
+        send_cmd(id, 0.0, 0.0, 20.0, 1.0, 0.0);
+    }
+}
