@@ -3,7 +3,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <controller_manager/controller_manager.h>
 #include <damiao_motor_driver/DriverLimitsConfig.h>
-#include <damiao_motor_driver/motor_driver.h>
+#include <damiao_motor_core/motor_driver_core.h>
+#include <damiao_motor_core/serial_transport.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
@@ -20,10 +21,10 @@ class MotorHWInterface : public hardware_interface::RobotHW
 {
 public:
     MotorHWInterface();
-    MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<MotorTransport> transport = nullptr);
+    MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<damiao_motor_core::Transport> transport = nullptr);
     void read();   // 从电机读取状态
     void write();  // 发送控制命令
-    ros::Time getLastFeedbackTime() const { return driver_.get_last_feedback_time(); }
+    ros::Time getLastFeedbackTime() const;
     ros::Time getLastCommandUpdateTime() const;
     void sendSafeMode();
     void stopDriver();
@@ -44,7 +45,8 @@ private:
     void refresh_gain_map(const std::string& param_name, std::map<std::string, double>& output_map) const;
 
     ros::NodeHandle nh_;
-    MotorDriver driver_;
+    std::shared_ptr<damiao_motor_core::MotorDriverCore> driver_core_;
+    damiao_motor_core::DriverConfig config_;
     std::string joint_prefix_;
     std::mutex limits_mutex_;
     dynamic_reconfigure::Server<damiao_motor_driver::DriverLimitsConfig> dr_srv_;

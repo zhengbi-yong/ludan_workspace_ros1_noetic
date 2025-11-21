@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
     rosbag
     message_generation
     damiao_motor_control_board_serial
+    damiao_motor_core
 )
 
 generate_dynamic_reconfigure_options(
@@ -26,6 +27,12 @@ add_message_files(
     FILES
     MotorCommand.msg           # 你刚刚新建的消息
     # 以后有其他 msg 也可以加在这里
+)
+
+add_service_files(
+    FILES
+    SendCommand.srv
+    SendCommands.srv
 )
 
 generate_messages(
@@ -38,14 +45,12 @@ catkin_package(
     LIBRARIES motor_hw_interface
     CATKIN_DEPENDS roscpp rospy serial diagnostic_updater dynamic_reconfigure
         hardware_interface controller_manager pluginlib std_msgs geometry_msgs rosbag
-        message_runtime
+        message_runtime damiao_motor_core
 )
 
 # Export the hardware_interface plugin description so pluginlib can discover
-# MotorHWInterface at runtime in both the devel and install spaces.  Older
-# ROS/Pluginlib distributions shipped with catkin don't provide the
-# pluginlib_export_plugin_description_file() helper macro, so fall back to the
-# previous manual copy logic if the macro is unavailable.
+# MotorHWInterface at runtime. Use the modern macro if available, otherwise
+# manually copy the file (silently, without warning).
 set(_motor_hw_plugin_xml ${CMAKE_CURRENT_SOURCE_DIR}/motor_hw_interface_plugin.xml)
 if(COMMAND pluginlib_export_plugin_description_file)
     pluginlib_export_plugin_description_file(
@@ -53,11 +58,7 @@ if(COMMAND pluginlib_export_plugin_description_file)
         ${_motor_hw_plugin_xml}
     )
 else()
-    message(WARNING
-        "pluginlib_export_plugin_description_file() is not available; "
-        "manually copying motor_hw_interface_plugin.xml into the devel "
-        "space so pluginlib can discover the MotorHWInterface plugin."
-    )
+    # Silently copy plugin file for older ROS distributions
     set(_motor_hw_plugin_dest
         ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/motor_hw_interface_plugin.xml
     )
@@ -87,8 +88,8 @@ add_library(motor_hw_interface
     src/motor_hw_interface.cpp
 )
 target_link_libraries(motor_hw_interface
-    motor_driver
     ${catkin_LIBRARIES}
+    ${damiao_motor_core_LIBRARIES}
 )
 
 
@@ -99,11 +100,15 @@ target_link_libraries(motor_hw_interface_node
     ${catkin_LIBRARIES}
 )
 
-# 启动驱动节点（唯一占用串口）
-add_executable(motor_driver_node src/motor_driver_node.cpp)
+# 启动驱动节点（唯一占用串口）- 使用新的MotorDriverNode
+add_executable(motor_driver_node src/motor_driver_node_main.cpp src/motor_driver_node.cpp)
 target_link_libraries(motor_driver_node
-    motor_driver
     ${catkin_LIBRARIES}
+    ${damiao_motor_core_LIBRARIES}
+)
+add_dependencies(motor_driver_node
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
 )
 
 # 单独控制任意电机

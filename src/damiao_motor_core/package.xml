@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>damiao_motor_core</name>
+  <version>1.0.0</version>
+  <description>Pure C++ core library for Damiao motor driver (no ROS dependencies)</description>
+
+  <maintainer email="zhengbi.yong@outlook.com">Zhengbi Yong</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 只依赖serial库，不依赖ROS -->
+  <depend>serial</depend>
+
+  <!-- 测试依赖 -->
+  <test_depend>gtest</test_depend>
+
+  <export>
+  </export>
+</package>
+

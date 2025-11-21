@@ -21,6 +21,7 @@
   <depend>geometry_msgs</depend>
   <depend>rosbag</depend>
   <depend>damiao_motor_control_board_serial</depend>
+  <depend>damiao_motor_core</depend>
 
   <!-- 为消息生成增加的依赖 -->
   <build_depend>message_generation</build_depend>
