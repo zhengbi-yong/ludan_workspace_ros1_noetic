@@ -22,7 +22,7 @@ namespace damiao_motor_control_board_serial
 {
 Motors::Motors()
 {
-  _node_handle.param("port", _port, std::string("/dev/ttyACM0")); 
+  _node_handle.param("port", _port, std::string("/dev/mcu")); 
   _node_handle.param("baud", _baud, 921600);
 
   motors.resize(NUM_MOTORS);

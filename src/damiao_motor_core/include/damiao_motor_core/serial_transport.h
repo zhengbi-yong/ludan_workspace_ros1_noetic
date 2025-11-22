@@ -15,7 +15,7 @@ namespace damiao_motor_core {
 
 class SerialTransport : public Transport {
 public:
-    SerialTransport(const std::string& port = "/dev/ttyACM0", int baud = 921600);
+    SerialTransport(const std::string& port = "/dev/mcu", int baud = 921600);
     ~SerialTransport() override;
 
     bool open() override;

@@ -19,7 +19,7 @@ else
     echo ""
     echo "   正确启动命令:"
     echo "   roslaunch damiao_motor_driver moveit_with_motor_driver.launch \\"
-    echo "     port:=/dev/ttyACM0 \\"
+    echo "     port:=/dev/mcu \\"
     echo "     baud:=921600 \\"
     echo "     joint_mapping:=\$(find damiao_motor_driver)/config/joint_mapping_example.yaml"
     echo ""

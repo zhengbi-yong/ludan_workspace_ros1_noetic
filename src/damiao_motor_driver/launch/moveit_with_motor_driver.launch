@@ -1,9 +1,9 @@
 <launch>
     <!-- 硬件接口参数 -->
-    <arg name="port" default="/dev/ttyACM0" />
+    <arg name="port" default="/dev/mcu" />
     <arg name="baud" default="921600" />
     <arg name="loop_hz" default="500" />
-    <arg name="joint_mapping" default="" />
+    <arg name="joint_mapping" default="$(find damiao_motor_driver)/config/joint_mapping_example.yaml" />
     
     <!-- MoveIt 参数 -->
     <arg name="moveit_controller_manager" default="ros_control" />

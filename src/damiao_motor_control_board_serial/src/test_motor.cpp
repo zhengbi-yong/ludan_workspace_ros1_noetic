@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
     // -------------- 打开串口 --------------
     serial::Serial ser;
-    ser.setPort("/dev/ttyACM0");
+    ser.setPort("/dev/mcu");
     ser.setBaudrate(921600);
     serial::Timeout to = serial::Timeout::simpleTimeout(20);
     ser.setTimeout(to);

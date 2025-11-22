@@ -1,11 +1,13 @@
 <launch>
     <arg name="ns" default="motor_hw_interface" />
-    <arg name="port" default="/dev/ttyACM0" />
+    <arg name="port" default="/dev/mcu" />
     <arg name="baud" default="921600" />
     <arg name="tf_prefix" default="" />
     <arg name="loop_hz" default="500" />
     <arg name="controller_config" default="$(find damiao_motor_driver)/cfg/moveit_controllers.yaml" />
     <arg name="joint_mapping" default="" />
+    <arg name="robot_description" default="" />
+    <arg name="use_robot_state_publisher" default="false" />
 
     <!-- 整个硬件系统放在 motor_hw_interface namespace -->
     <group ns="$(arg ns)">
@@ -24,10 +26,13 @@
             <param name="baud" value="$(arg baud)" />
             <param name="tf_prefix" value="$(arg tf_prefix)" />
             <param name="loop_hz" value="$(arg loop_hz)" />
-
-            <!-- ③ joints 自动加载到 ~joints（这是 MotorHWInterface 正确读取的位置） -->
-            <rosparam command="load" file="$(arg joint_mapping)" />
         </node>
+
+        <!-- ③ joints 自动加载到 ~joints（这是 MotorHWInterface 正确读取的位置） -->
+        <!-- 只有当 joint_mapping 参数不为空时才加载 -->
+        <group if="$(eval arg('joint_mapping') != '')">
+            <rosparam command="load" file="$(arg joint_mapping)" ns="hardware" />
+        </group>
 
         <!-- 自动加载 joint_state_controller，延迟 3 秒 -->
         <node pkg="controller_manager"
@@ -45,10 +50,15 @@
           name="joint_states_relay"
           args="/motor_hw_interface/hardware/joint_states /joint_states" />
 
-    <node pkg="robot_state_publisher"
-          type="robot_state_publisher"
-          name="robot_state_publisher">
-        <remap from="joint_states" to="/joint_states" />
-    </node>
+    <!-- robot_state_publisher 需要 robot_description 参数 -->
+    <!-- 只有当提供了 robot_description 时才启动 -->
+    <group if="$(eval arg('robot_description') != '')">
+        <param name="robot_description" textfile="$(arg robot_description)" />
+        <node pkg="robot_state_publisher"
+              type="robot_state_publisher"
+              name="robot_state_publisher">
+            <remap from="joint_states" to="/joint_states" />
+        </node>
+    </group>
 
 </launch>

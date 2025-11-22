@@ -3,7 +3,7 @@
 
 motor_driver_node:
   # Serial port configuration
-  port: "/dev/ttyACM0"
+  port: "/dev/mcu"
   baud: 921600
   
   # Publishing configuration
@@ -30,7 +30,7 @@ motor_driver_node:
 
 motor_hw_interface:
   # Serial port configuration
-  port: "/dev/ttyACM0"
+  port: "/dev/mcu"
   baud: 921600
   
   # Control loop rate

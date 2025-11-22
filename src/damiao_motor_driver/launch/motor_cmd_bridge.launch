@@ -1,6 +1,6 @@
 <launch>
     <arg name="ns" default="motor_driver" />
-    <arg name="service_name" default="motor_driver_node/send_command" />
+    <arg name="service_name" default="motor_driver/send_command" />
 
     <group ns="$(arg ns)">
         <node pkg="damiao_motor_driver"

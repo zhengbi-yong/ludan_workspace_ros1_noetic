@@ -843,7 +843,7 @@ damiao_policy_bridge/
 **格式：**
 ```yaml
 driver:
-  port: "/dev/ttyACM0"
+  port: "/dev/mcu"
   baud_rate: 921600
   read_timeout_ms: 50
   write_timeout_ms: 50

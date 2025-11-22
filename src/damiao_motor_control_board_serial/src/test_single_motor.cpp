@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     nh.param("motor_id", motor_id, 0);
 
     serial::Serial ser;
-    ser.setPort("/dev/ttyACM0");
+    ser.setPort("/dev/mcu");
     ser.setBaudrate(921600);
     serial::Timeout to = serial::Timeout::simpleTimeout(20);
     ser.setTimeout(to);

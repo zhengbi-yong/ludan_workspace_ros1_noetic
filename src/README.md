@@ -16,7 +16,7 @@
 - Ubuntu 20.04 + ROS Noetic Desktop-Full。
 - 基础工具：`catkin_tools` 或 `catkin_make`、`rosdep`、`python3-roslaunch`。
 - Python 依赖（用于策略桥接/ONNX 推理）：`onnxruntime`、`torch`（按需安装）。
-- 硬件：达妙电机控制板（串口，默认 `/dev/ttyUSB0`/`/dev/ttyACM0`）。
+- 硬件：达妙电机控制板（串口，默认 `/dev/ttyUSB0`/`/dev/mcu`）。
 
 首次克隆后执行：
 ```bash
@@ -37,7 +37,7 @@ source devel/setup.bash
 1. 连接控制板并确认设备节点，如 `ls /dev/ttyACM*`。
 2. 设置权限（或配置 udev 规则）：
    ```bash
-   sudo chmod a+rw /dev/ttyACM0
+   sudo chmod a+rw /dev/mcu
    ```
 3. 若需要高速率，请使用 USB3 线缆，并保证线长 <1.5m。
 
@@ -47,7 +47,7 @@ source devel/setup.bash
 
 用于验证 30 路电机反馈：
 ```bash
-roslaunch damiao_motor_driver motor_driver.launch port:=/dev/ttyACM0 baud:=921600
+roslaunch damiao_motor_driver motor_driver.launch port:=/dev/mcu baud:=921600
 ```
 该节点会发布 `motor_states` 与 `status`，可使用 `rostopic echo` 或 `rqt_plot` 观察。【F:src/damiao_motor_driver/launch/motor_driver.launch†L1-L13】【F:src/damiao_motor_driver/src/motor_driver.cpp†L14-L86】
 
@@ -68,7 +68,7 @@ Launch 文件会加载 `test_motor` 节点并持续打印反馈，有助于确�
 推荐使用 `motor_hw_with_effort_controller.launch`：
 ```bash
 roslaunch damiao_motor_driver motor_hw_with_effort_controller.launch \
-  port:=/dev/ttyACM0 baud:=921600 loop_hz:=500
+  port:=/dev/mcu baud:=921600 loop_hz:=500
 ```
 该 Launch 做了三件事：
 1. 启动 `motor_hw_interface_node`，内部加载 `MotorHWInterface` 插件并提供 `safe_stop` 服务、看门狗诊断。【F:src/damiao_motor_driver/launch/motor_hw_with_effort_controller.launch†L1-L24】【F:src/damiao_motor_driver/src/motor_hw_interface_node.cpp†L1-L106】
@@ -101,13 +101,13 @@ rostopic echo /motor_hw_interface/motor_states
 
 1. **准备工作空间与硬件**  
    - 按“环境依赖”“编译工作空间”“硬件连接”章节完成 `catkin_make`、串口授权等准备。  
-   - 确认控制板在 `/dev/ttyACM0`（或自定义）可用，并记录波特率。
+   - 确认控制板在 `/dev/mcu`（或自定义）可用，并记录波特率。
 
 2. **启动 MotorHWInterface + 控制器**  
    在第一个终端中执行：
    ```bash
    roslaunch damiao_motor_driver motor_hw_with_effort_controller.launch \
-     port:=/dev/ttyACM0 baud:=921600 loop_hz:=500
+     port:=/dev/mcu baud:=921600 loop_hz:=500
    ```
    该 launch 会：
    - 加载 `MotorHWInterface` 插件，并在 `/motor_hw_interface` 命名空间下发布 `joint_states`、`motor_states` 以及 `follow_joint_trajectory` action。  
@@ -161,7 +161,7 @@ rostopic echo /motor_hw_interface/motor_states
 `scripts/policy_bridge.py` 可将 TorchScript/ONNX 模型或外部话题映射到 `joint_group_effort_controller/command`，示例启动文件为 `motor_hw_with_rl.launch`：
 ```bash
 roslaunch damiao_motor_driver motor_hw_with_rl.launch \
-  port:=/dev/ttyACM0 policy_path:=/path/to/policy.onnx joint_order:="[0,1,2,3]"
+  port:=/dev/mcu policy_path:=/path/to/policy.onnx joint_order:="[0,1,2,3]"
 ```
 该 launch 在硬件接口与控制器之外额外启动策略桥接节点，并将动作发送到 `joint_group_effort_controller/command`。可通过参数调整推理频率、动作裁剪、观测字段等。【F:src/damiao_motor_driver/launch/motor_hw_with_rl.launch†L1-L38】
 

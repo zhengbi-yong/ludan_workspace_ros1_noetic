@@ -23,7 +23,7 @@ bool MotorDriverNode::initialize() {
     // 加载配置参数
     std::string port;
     int baud_rate;
-    private_nh_.param<std::string>("port", port, "/dev/ttyACM0");
+    private_nh_.param<std::string>("port", port, "/dev/mcu");
     private_nh_.param<int>("baud", baud_rate, 921600);
     private_nh_.param<std::string>("tf_prefix", tf_prefix_, std::string());
     

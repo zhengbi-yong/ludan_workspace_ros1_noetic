@@ -20,7 +20,7 @@ MotorHWInterface::MotorHWInterface(const ros::NodeHandle& nh, std::shared_ptr<da
     // 加载配置参数
     std::string port;
     int baud_rate;
-    nh_.param<std::string>("port", port, "/dev/ttyACM0");
+    nh_.param<std::string>("port", port, "/dev/mcu");
     nh_.param<int>("baud", baud_rate, 921600);
     
     // 配置核心驱动
