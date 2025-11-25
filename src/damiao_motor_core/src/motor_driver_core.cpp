@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <mutex>
 
 namespace damiao_motor_core {
 
@@ -205,6 +206,11 @@ void MotorDriverCore::register_error_callback(std::function<void(const ErrorCont
     error_handler_->register_global_callback(callback);
 }
 
+void MotorDriverCore::register_state_update_callback(std::function<void()> callback) {
+    std::lock_guard<std::mutex> lock(callback_mutex_);
+    state_update_callback_ = callback;
+}
+
 void MotorDriverCore::command_loop() {
     while (running_.load(std::memory_order_acquire)) {
         // 从队列获取所有待发送命令
@@ -339,6 +345,14 @@ bool MotorDriverCore::parse_feedback_frame(const uint8_t* buffer, size_t size) {
             feedback_period_avg_ms_.store(period_ms, std::memory_order_relaxed);
         } else {
             feedback_period_avg_ms_.store(0.9 * avg + 0.1 * period_ms, std::memory_order_relaxed);
+        }
+    }
+    
+    // 触发状态更新回调（事件驱动发布）
+    {
+        std::lock_guard<std::mutex> lock(callback_mutex_);
+        if (state_update_callback_) {
+            state_update_callback_();
         }
     }
     

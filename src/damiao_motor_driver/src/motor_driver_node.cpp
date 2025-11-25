@@ -36,6 +36,8 @@ bool MotorDriverNode::initialize() {
     config_.max_reconnect_attempts = 5;
     
     // 加载电机配置
+    motor_types_.resize(30, "MIT_4340");  // 默认类型
+    motor_states_.resize(30, 0);          // 默认状态
     XmlRpc::XmlRpcValue motors_param;
     if (private_nh_.getParam("motors", motors_param) && motors_param.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         config_.motors.clear();
@@ -49,22 +51,31 @@ bool MotorDriverNode::initialize() {
                 }
                 if (motors_param[i].hasMember("type")) {
                     motor_cfg.type = static_cast<std::string>(motors_param[i]["type"]);
+                    motor_types_[i] = motor_cfg.type;  // 缓存类型
                 } else {
                     motor_cfg.type = "MIT_4340";
+                    motor_types_[i] = "MIT_4340";
                 }
                 if (motors_param[i].hasMember("state")) {
                     motor_cfg.state = static_cast<int>(motors_param[i]["state"]);
+                    motor_states_[i] = motor_cfg.state;  // 缓存状态
                 } else {
                     motor_cfg.state = 0;
+                    motor_states_[i] = 0;
                 }
             } else {
                 motor_cfg.id = i;
                 motor_cfg.type = "MIT_4340";
                 motor_cfg.state = 0;
+                motor_types_[i] = "MIT_4340";
+                motor_states_[i] = 0;
             }
             config_.motors.push_back(motor_cfg);
         }
     }
+    
+    // 预分配消息对象，避免每次分配
+    msg_cache_.motors.resize(30);
     
     // 创建传输层
     auto transport = std::make_shared<damiao_motor_core::SerialTransport>(port, baud_rate);
@@ -83,20 +94,33 @@ bool MotorDriverNode::initialize() {
             this->error_callback(error);
         });
     
-    // 设置话题发布
+    // 设置话题发布（增大队列大小以减少阻塞）
     ros::NodeHandle pub_nh = tf_prefix_.empty() ? nh_ : ros::NodeHandle(nh_, tf_prefix_);
-    motor_states_pub_ = pub_nh.advertise<damiao_motor_control_board_serial::MotorStates>("motor_states", 10);
+    motor_states_pub_ = pub_nh.advertise<damiao_motor_control_board_serial::MotorStates>("motor_states", 100);
     status_pub_ = pub_nh.advertise<diagnostic_msgs::DiagnosticArray>("status", 1, true);
     
     // 设置服务
     send_command_srv_ = private_nh_.advertiseService("send_command", &MotorDriverNode::send_command_service, this);
     send_commands_srv_ = private_nh_.advertiseService("send_commands", &MotorDriverNode::send_commands_service, this);
     
-    // 设置定时器
-    double publish_rate;
-    private_nh_.param<double>("publish_rate", publish_rate, 100.0);
-    state_publish_timer_ = nh_.createTimer(ros::Duration(1.0 / publish_rate),
-                                          [this](const ros::TimerEvent&) { this->publish_states(); });
+    // 注册状态更新回调（事件驱动发布，替代Timer）
+    bool use_event_driven = true;
+    private_nh_.param<bool>("use_event_driven_publish", use_event_driven, true);
+    
+    if (use_event_driven) {
+        // 事件驱动发布：数据到达时立即发布
+        driver_core_->register_state_update_callback([this]() {
+            this->publish_states();
+        });
+        ROS_INFO("Using event-driven publishing for motor_states");
+    } else {
+        // 定时器发布（备用方案）
+        double publish_rate;
+        private_nh_.param<double>("publish_rate", publish_rate, 500.0);
+        state_publish_timer_ = nh_.createTimer(ros::Duration(1.0 / publish_rate),
+                                              [this](const ros::TimerEvent&) { this->publish_states(); });
+        ROS_INFO("Using timer-driven publishing at %.1f Hz", publish_rate);
+    }
     
     double diagnostic_rate;
     private_nh_.param<double>("diagnostic_rate", diagnostic_rate, 1.0);
@@ -127,24 +151,25 @@ void MotorDriverNode::publish_states() {
         return;
     }
     
-    damiao_motor_control_board_serial::MotorStates msg;
-    msg.header.stamp = ros::Time::now();
+    // 使用预分配的消息对象，避免每次创建
+    msg_cache_.header.stamp = ros::Time::now();
     
-    // 使用零拷贝访问状态
-    bool success = driver_core_->visit_states([&msg](const damiao_motor_core::MotorStates& states) {
-        msg.motors.resize(30);
+    // 使用零拷贝访问状态，直接填充预分配的motors数组
+    bool success = driver_core_->visit_states([this](const damiao_motor_core::MotorStates& states) {
+        // 直接使用预分配的数组，避免resize开销
         for (size_t i = 0; i < 30; ++i) {
-            msg.motors[i].id = states.motors[i].id;
-            msg.motors[i].pos = states.motors[i].pos;
-            msg.motors[i].vel = states.motors[i].vel;
-            msg.motors[i].tor = states.motors[i].tor;
-            msg.motors[i].state = 0;  // 从配置中获取
-            msg.motors[i].type = "MIT_4340";  // 从配置中获取
+            msg_cache_.motors[i].id = states.motors[i].id;
+            msg_cache_.motors[i].pos = states.motors[i].pos;
+            msg_cache_.motors[i].vel = states.motors[i].vel;
+            msg_cache_.motors[i].tor = states.motors[i].tor;
+            // 使用缓存的类型和状态，避免字符串分配
+            msg_cache_.motors[i].type = motor_types_[i];
+            msg_cache_.motors[i].state = motor_states_[i];
         }
     });
     
     if (success) {
-        motor_states_pub_.publish(msg);
+        motor_states_pub_.publish(msg_cache_);
     }
 }
 

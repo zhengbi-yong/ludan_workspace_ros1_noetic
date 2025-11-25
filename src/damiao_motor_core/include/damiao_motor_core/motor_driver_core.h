@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 #include <chrono>
+#include <mutex>
 #include "transport.h"
 #include "motor_state.h"
 #include "motor_command.h"
@@ -65,6 +66,9 @@ public:
     // 错误处理
     void register_error_callback(std::function<void(const ErrorContext&)> callback);
     
+    // 状态更新回调（事件驱动发布）
+    void register_state_update_callback(std::function<void()> callback);
+    
 private:
     void feedback_loop();
     void command_loop();
@@ -99,6 +103,10 @@ private:
     // 解析状态
     size_t parse_failure_streak_;
     size_t timeout_streak_;
+    
+    // 状态更新回调（事件驱动发布）
+    std::function<void()> state_update_callback_;
+    std::mutex callback_mutex_;  // 保护回调的线程安全
 };
 
 // 模板实现

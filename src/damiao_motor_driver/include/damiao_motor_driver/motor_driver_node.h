@@ -53,6 +53,11 @@ private:
     // 统计信息
     uint64_t last_frames_received_;
     uint64_t last_frames_lost_;
+    
+    // 优化：预分配的消息对象和缓存数据
+    damiao_motor_control_board_serial::MotorStates msg_cache_;
+    std::vector<std::string> motor_types_;  // 从配置读取的电机类型
+    std::vector<int32_t> motor_states_;     // 从配置读取的电机状态
 };
 
 } // namespace damiao_motor_driver

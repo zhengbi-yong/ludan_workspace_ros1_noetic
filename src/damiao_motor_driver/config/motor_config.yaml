@@ -7,7 +7,7 @@ motor_driver_node:
   baud: 921600
   
   # Publishing configuration
-  publish_rate: 100.0  # Hz
+  publish_rate: 500.0  # Hz (optimized: 500Hz is more realistic for ROS Timer)
   diagnostic_rate: 1.0  # Hz
   
   # TF prefix (optional)
