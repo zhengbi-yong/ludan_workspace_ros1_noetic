@@ -4,6 +4,18 @@ project(damiao_motor_control_board_serial)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 link_directories(/opt/ros/noetic/lib)
+
+# 确保能够找到roscpp等ROS包
+# 如果CMAKE_PREFIX_PATH不包含/opt/ros/noetic，手动添加
+if(CMAKE_PREFIX_PATH)
+    list(FIND CMAKE_PREFIX_PATH "/opt/ros/noetic" _index)
+    if(_index EQUAL -1)
+        list(APPEND CMAKE_PREFIX_PATH "/opt/ros/noetic")
+    endif()
+else()
+    set(CMAKE_PREFIX_PATH "/opt/ros/noetic")
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
@@ -18,13 +30,25 @@ generate_dynamic_reconfigure_options(
   cfg/my_cfg.cfg
 )
 add_message_files(
-  FILES
-  MotorState.msg
-  MotorStates.msg
+    FILES
+    MotorState.msg
+    MotorStates.msg
 )
+
+# 确保genmsg能够找到std_msgs的msg-paths.cmake文件
+# 将/opt/ros/noetic添加到CATKIN_WORKSPACES（如果还没有的话）
+if(CATKIN_WORKSPACES)
+    list(FIND CATKIN_WORKSPACES "/opt/ros/noetic" _index)
+    if(_index EQUAL -1)
+        list(APPEND CATKIN_WORKSPACES "/opt/ros/noetic")
+    endif()
+else()
+    set(CATKIN_WORKSPACES "/opt/ros/noetic")
+endif()
+
 generate_messages(
-  DEPENDENCIES
-  std_msgs
+    DEPENDENCIES
+    std_msgs
 )
 catkin_package(
   INCLUDE_DIRS include

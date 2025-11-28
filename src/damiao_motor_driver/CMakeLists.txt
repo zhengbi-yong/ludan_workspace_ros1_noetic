@@ -3,6 +3,27 @@ project(damiao_motor_driver)
 
 add_compile_options(-std=c++17 -O3 -Wall)
 
+# 确保能够找到ROS包
+# 如果CMAKE_PREFIX_PATH不包含/opt/ros/noetic，手动添加
+if(CMAKE_PREFIX_PATH)
+    list(FIND CMAKE_PREFIX_PATH "/opt/ros/noetic" _index)
+    if(_index EQUAL -1)
+        list(APPEND CMAKE_PREFIX_PATH "/opt/ros/noetic")
+    endif()
+else()
+    set(CMAKE_PREFIX_PATH "/opt/ros/noetic")
+endif()
+
+# 手动include damiao_motor_control_board_serial的配置文件（如果存在）
+# 这样可以确保catkin的find_package能够找到它
+foreach(_prefix ${CMAKE_PREFIX_PATH})
+    set(_config_file "${_prefix}/share/damiao_motor_control_board_serial/cmake/damiao_motor_control_board_serialConfig.cmake")
+    if(EXISTS "${_config_file}" OR IS_SYMLINK "${_config_file}")
+        include("${_config_file}")
+        break()
+    endif()
+endforeach()
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy

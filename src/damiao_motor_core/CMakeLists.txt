@@ -52,6 +52,14 @@ catkin_package(
     DEPENDS serial
 )
 
+# 确保静态库被复制到devel目录（catkin在处理静态库时可能需要这个）
+# 在devel模式下，install命令不会自动执行，所以使用POST_BUILD命令
+add_custom_command(TARGET damiao_motor_core POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CATKIN_DEVEL_PREFIX}/lib
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:damiao_motor_core> ${CATKIN_DEVEL_PREFIX}/lib/
+    COMMENT "Copying damiao_motor_core library to devel directory"
+)
+
 # 安装规则
 install(TARGETS damiao_motor_core
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
