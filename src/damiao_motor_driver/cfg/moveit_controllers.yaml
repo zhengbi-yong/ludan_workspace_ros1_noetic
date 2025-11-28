@@ -1,6 +1,6 @@
 joint_state_controller:
   type: joint_state_controller/JointStateController
-  publish_rate: 200
+  publish_rate: 500
   # 不指定 joints 参数，让控制器自动从硬件接口读取所有注册的关节
   # 这样可以避免关节名称不匹配的问题
 
