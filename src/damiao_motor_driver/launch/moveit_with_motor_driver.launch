@@ -38,18 +38,7 @@
               ns="$(arg ns)" />
 
     <!-- 等待 hardware_interface 初始化 -->
-    <node pkg="roslaunch"
-          type="sleep.py"
-          name="controller_delay"
-          args="3" output="screen"/>
-
-    <!-- 自动启动 joint_state_controller -->
-    <node pkg="controller_manager"
-          type="spawner"
-          name="spawner_joint_state"
-          ns="$(arg ns)"
-          output="screen"
-          args="joint_state_controller" />
+    <!-- 注意: joint_state_controller 已在 motor_hw_with_moveit.launch 中自动加载，无需重复加载 -->
 
     <!-- 自动启动左臂 -->
     <!-- <node pkg="controller_manager"
